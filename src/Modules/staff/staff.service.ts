@@ -148,8 +148,8 @@ export class StaffService {
     }
 
     // Delete profile picture from Cloudinary if it exists
-    if (staff.profilePicture?.public_id) {
-      await this.cloudinaryService.deleteFile(staff.profilePicture.public_id);
+    if (staff.profilePicture) {
+      await this.cloudinaryService.deleteFile(staff.profilePicture.public_id as string);
     }
 
     await this._staffRepository.findByIdAndDelete(id);
