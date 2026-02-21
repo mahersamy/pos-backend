@@ -24,8 +24,6 @@ import { ConfigModule } from '@nestjs/config';
 
     // Database
     MongooseModule.forRoot(process.env.DATABASE_URI as string),
-
-    StaffModule,
   ],
   controllers: [AppController],
   providers: [

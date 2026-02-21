@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { Role } from '../../common/Enums/role.enum';
 import { OtpDocument } from './otp.model';
+import { Action, Resource } from 'src/common';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -21,6 +22,19 @@ export class User {
 
   @Prop({ type: String, enum: Role, default: Role.USER, required: true })
   role: Role;
+
+  @Prop({
+    _id: false,
+    type: [
+      {
+        _id: false,
+        resource: { type: String, enum: Resource, required: true },
+        actions: [{ type: String, enum: Action }],
+      },
+    ],
+    default: [],
+  })
+  permissions: { resource: Resource; actions: Action[] }[];
 
   @Prop({ type: Number, min: [14, 'Age must be at least 14'], required: true })
   age: number;

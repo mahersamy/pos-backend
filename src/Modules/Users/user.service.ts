@@ -1,8 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from '../../DB/Repository/user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
-import { HashService } from 'src/common';
+import { HashService, ROLE_DEFAULT_PERMISSIONS } from 'src/common';
 import { EncryptionService } from 'src/common';
+import { AddPermissonDto } from './dto/add-permisson.dto';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,9 @@ export class UserService {
     if (existingUser) {
       throw new ConflictException('User already exists');
     }
+
+    const defaultPermissions =ROLE_DEFAULT_PERMISSIONS[user.role] ?? [];
+    
     const hashedPassword = await this._hashService.hash(user.password);
     const encryptedPhoneNumber = await this._encryptionService.encrypt(
       user.phoneNumber,
@@ -27,10 +31,26 @@ export class UserService {
       ...user,
       password: hashedPassword,
       phoneNumber: encryptedPhoneNumber,
+      permissions: defaultPermissions,
     });
 
     return {
       message: 'Create User Successfully',
+    };
+  }
+
+
+
+
+  async addPermissions(id: string, body: AddPermissonDto) {
+    const user = await this._userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    user.permissions = body.permissions;
+    await user.save();
+    return {
+      message: 'Permissions added successfully',
     };
   }
 }

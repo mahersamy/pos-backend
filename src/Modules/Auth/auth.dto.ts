@@ -11,7 +11,9 @@ import {
   IsOptional,
   Min,
   IsStrongPassword,
+  IsArray,
 } from 'class-validator';
+import { Action, Resource } from 'src/common';
 
 @ValidatorConstraint({ name: 'isMatch', async: false })
 export class IsMatchConstraint implements ValidatorConstraintInterface {
@@ -75,3 +77,7 @@ export class LoginBodyDto {
   @IsNotEmpty()
   password: string;
 }
+
+
+
+

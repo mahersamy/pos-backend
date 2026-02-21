@@ -1,4 +1,5 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsStrongPassword, Min, MinLength } from "class-validator";
+import { Role } from "src/common";
 
 export class CreateUserDto {
   @IsString({ message: 'name must be a string' })
@@ -18,6 +19,10 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsStrongPassword()
   password: string;
+
+  @IsEnum(Role)
+  @IsNotEmpty()
+  role: Role;
 
 //   @Validate(IsMatchConstraint)
 //   confirmPassword: string;

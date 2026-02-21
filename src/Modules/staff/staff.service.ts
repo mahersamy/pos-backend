@@ -21,6 +21,7 @@ export class StaffService {
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
   async create(createStaffDto: CreateStaffDto, user: UserDocument) {
+    console.log(user.permissions);
     const existingStaff = await this._staffRepository.findOne({
       email: createStaffDto.email,
     });
