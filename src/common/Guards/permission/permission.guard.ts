@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Action, Resource, Role } from '../../Enums';
+import { PERMISSION_KEY } from 'src/common/Decorators';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
@@ -15,7 +16,7 @@ export class PermissionGuard implements CanActivate {
     const requiredPermissions =
       this._reflector.getAllAndOverride<
         { resource: Resource; actions: Action[] }[]
-      >('permission', [context.getHandler(), context.getClass()]) ?? [];
+      >(PERMISSION_KEY, [context.getHandler(), context.getClass()]) ?? [];
 
     if (requiredPermissions.length === 0) {
       return true;

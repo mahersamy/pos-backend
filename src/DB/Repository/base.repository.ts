@@ -1,30 +1,40 @@
-import { 
-  Model, 
-  ProjectionType, 
-  QueryFilter, 
-  QueryOptions, 
-  Types, 
-  UpdateQuery, 
+import {
+  Model,
+  ProjectionType,
+  QueryFilter,
+  QueryOptions,
+  Types,
+  UpdateQuery,
   PopulateOptions,
 } from 'mongoose';
 
 // Custom options type
 export type FindOptions<T> = QueryOptions<T> & {
   populate?: string | PopulateOptions | (string | PopulateOptions)[];
+  select?: string | Record<string, number | boolean | object>;
 };
 
 export abstract class BaseRepository<T> {
   constructor(protected readonly model: Model<T>) {}
 
+  // Helper method to handle select
+  protected applySelect<Q>(
+    query: Q,
+    select?: string | Record<string, number | boolean | object>,
+  ): Q {
+    if (!select) return query;
+    return (query as any).select(select);
+  }
+
   // Helper method to handle populate
   protected applyPopulate<Q>(
     query: Q,
-    populate?: string | PopulateOptions | (string | PopulateOptions)[]
+    populate?: string | PopulateOptions | (string | PopulateOptions)[],
   ): Q {
     if (!populate) return query;
 
     if (Array.isArray(populate)) {
-      populate.forEach(p => {
+      populate.forEach((p) => {
         (query as any).populate(p);
       });
     } else {
@@ -49,11 +59,12 @@ export abstract class BaseRepository<T> {
     projection?: ProjectionType<T>,
     options?: FindOptions<T>,
   ): Promise<T | null> {
-    const { populate, ...queryOptions } = options || {};
+    const { populate, select, ...queryOptions } = options || {};
     let query = this.model.findOne(filter, projection, queryOptions);
-    
+
     query = this.applyPopulate(query, populate);
-    
+    query = this.applySelect(query, select);
+
     return query;
   }
 
@@ -62,11 +73,12 @@ export abstract class BaseRepository<T> {
     projection?: ProjectionType<T>,
     options?: FindOptions<T>,
   ): Promise<T[]> {
-    const { populate, ...queryOptions } = options || {};
+    const { populate, select, ...queryOptions } = options || {};
     let query = this.model.find(filter, projection, queryOptions);
-    
+
     query = this.applyPopulate(query, populate);
-    
+    query = this.applySelect(query, select);
+
     return query;
   }
 
@@ -75,14 +87,12 @@ export abstract class BaseRepository<T> {
     projection?: ProjectionType<T>,
     options?: FindOptions<T>,
   ): Promise<T | null> {
-    const { populate,select, ...queryOptions } = options || {};
+    const { populate, select, ...queryOptions } = options || {};
     let query = this.model.findById(id, projection, queryOptions);
-    
+
     query = this.applyPopulate(query, populate);
-    if(select){
-      query = query.select(select);
-    }
-    
+    query = this.applySelect(query, select);
+
     return query;
   }
 
@@ -105,15 +115,15 @@ export abstract class BaseRepository<T> {
     update: UpdateQuery<T>,
     options?: FindOptions<T>,
   ): Promise<T | null> {
-    const { populate, ...queryOptions } = options || {};
-    let query = this.model.findOneAndUpdate(
-      filter, 
-      update, 
-      { new: true, ...queryOptions }
-    );
-    
+    const { populate, select, ...queryOptions } = options || {};
+    let query = this.model.findOneAndUpdate(filter, update, {
+      new: true,
+      ...queryOptions,
+    });
+
     query = this.applyPopulate(query, populate);
-    
+    query = this.applySelect(query, select);
+
     return query;
   }
 
@@ -122,15 +132,15 @@ export abstract class BaseRepository<T> {
     update: UpdateQuery<T>,
     options?: FindOptions<T>,
   ): Promise<T | null> {
-    const { populate, ...queryOptions } = options || {};
-    let query = this.model.findByIdAndUpdate(
-      id, 
-      update, 
-      { new: true, ...queryOptions }
-    );
-    
+    const { populate, select, ...queryOptions } = options || {};
+    let query = this.model.findByIdAndUpdate(id, update, {
+      new: true,
+      ...queryOptions,
+    });
+
     query = this.applyPopulate(query, populate);
-    
+    query = this.applySelect(query, select);
+
     return query;
   }
 
@@ -202,10 +212,7 @@ export abstract class BaseRepository<T> {
 
     query = this.applyPopulate(query, populate);
 
-    const [data, total] = await Promise.all([
-      query.exec(),
-      this.count(filter),
-    ]);
+    const [data, total] = await Promise.all([query.exec(), this.count(filter)]);
 
     const totalPages = Math.ceil(total / limit);
 
@@ -224,6 +231,4 @@ export abstract class BaseRepository<T> {
   async aggregate<R = any>(pipeline: any[]): Promise<R[]> {
     return this.model.aggregate(pipeline);
   }
-
-
 }

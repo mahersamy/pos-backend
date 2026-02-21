@@ -12,6 +12,18 @@ import type { UserDocument } from 'src/DB/Models/users.model';
 import { GetAllStaffDto } from './dto/get-all-staff.dto';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 
+// staff/staff.service.ts
+import {
+  STAFF_SELECT,
+  STAFF_POPULATE,
+} from '../../DB/Repository/staff.repository';
+
+// Reusable options object
+const STAFF_QUERY_OPTIONS = {
+  select: STAFF_SELECT,
+  populate: STAFF_POPULATE,
+};
+
 @Injectable()
 export class StaffService {
   constructor(
@@ -21,7 +33,6 @@ export class StaffService {
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
   async create(createStaffDto: CreateStaffDto, user: UserDocument) {
-    console.log(user.permissions);
     const existingStaff = await this._staffRepository.findOne({
       email: createStaffDto.email,
     });
@@ -29,12 +40,13 @@ export class StaffService {
       throw new ConflictException('Staff with this email already exists');
     }
 
-    await this._staffRepository.create({
+    // ✅ create and return with select applied
+    const staff = await this._staffRepository.createAndReturn({
       ...createStaffDto,
       createdBy: user._id,
     });
 
-    return 'Staff created successfully';
+    return staff;
   }
 
   // ─── GET ALL ──────────────────────────────────────────────────────────────
@@ -56,35 +68,25 @@ export class StaffService {
       page,
       limit,
       sort: sort === 'asc' ? { createdAt: 1 } : { createdAt: -1 },
-      populate: {
-        path: 'createdBy',
-        select: 'firstName lastName email',
-      },
-      select: 'fullname email position phoneNumber salary profilePicture.secure_url startShiftTiming endShiftTiming',
+      ...STAFF_QUERY_OPTIONS, // ✅ reuse
     });
   }
 
   // ─── GET ONE ──────────────────────────────────────────────────────────────
   async findOne(id: string) {
-    const staff = await this._staffRepository.findById(id,{},{
-      populate: {
-        path: 'createdBy',
-        select: 'firstName lastName email',
-      },
-      select: 'fullname email position phoneNumber salary profilePicture.secure_url startShiftTiming endShiftTiming',
-    });
-    if (!staff) {
-      throw new NotFoundException('Staff not found');
-    }
+    const staff = await this._staffRepository.findById(
+      id,
+      {},
+      STAFF_QUERY_OPTIONS, // ✅ reuse
+    );
+    if (!staff) throw new NotFoundException('Staff not found');
     return staff;
   }
 
   // ─── UPDATE ───────────────────────────────────────────────────────────────
   async update(id: string, updateStaffDto: UpdateStaffDto) {
     const staff = await this._staffRepository.findById(id);
-    if (!staff) {
-      throw new NotFoundException('Staff not found');
-    }
+    if (!staff) throw new NotFoundException('Staff not found');
 
     if (updateStaffDto.email && updateStaffDto.email !== staff.email) {
       const emailExists = await this._staffRepository.findOne({
@@ -99,26 +101,21 @@ export class StaffService {
     const updated = await this._staffRepository.findByIdAndUpdate(
       id,
       updateStaffDto,
+      STAFF_QUERY_OPTIONS, // ✅ reuse
     );
 
-    return { message: 'Staff updated successfully', data: updated };
+    return updated;
   }
 
   // ─── ADD / REPLACE IMAGE ──────────────────────────────────────────────────
   async addImage(id: string, image: Express.Multer.File) {
     const staff = await this._staffRepository.findById(id);
-    if (!staff) {
-      throw new NotFoundException('Staff not found');
-    }
+    if (!staff) throw new NotFoundException('Staff not found');
+    if (!image) throw new BadRequestException('No image provided');
 
-    if (!image) {
-      throw new BadRequestException('No image provided');
-    }
-
-    // Delete old image from Cloudinary if it exists
     if (staff.profilePicture?.public_id) {
       await this.cloudinaryService.deleteFile(
-        staff.profilePicture.public_id as string,
+        String(staff.profilePicture.public_id),
       );
     }
 
@@ -128,7 +125,7 @@ export class StaffService {
       toWebp: true,
     });
 
-     await this._staffRepository.findByIdAndUpdate(
+    const updated = await this._staffRepository.findByIdAndUpdate(
       id,
       {
         profilePicture: {
@@ -136,25 +133,24 @@ export class StaffService {
           public_id: uploaded.public_id,
         },
       },
+      STAFF_QUERY_OPTIONS, // ✅ reuse
     );
 
-    return 'Image uploaded successfully' ;
+    return updated;
   }
 
   // ─── DELETE ───────────────────────────────────────────────────────────────
   async remove(id: string) {
     const staff = await this._staffRepository.findById(id);
-    if (!staff) {
-      throw new NotFoundException('Staff not found');
-    }
+    if (!staff) throw new NotFoundException('Staff not found');
 
-    // Delete profile picture from Cloudinary if it exists
-    if (staff.profilePicture) {
-      await this.cloudinaryService.deleteFile(staff.profilePicture.public_id as string);
+    if (staff.profilePicture?.public_id) {
+      await this.cloudinaryService.deleteFile(
+        String(staff.profilePicture.public_id),
+      );
     }
 
     await this._staffRepository.findByIdAndDelete(id);
-
-    return { message: 'Staff deleted successfully' };
+    return 'Staff deleted successfully';
   }
 }

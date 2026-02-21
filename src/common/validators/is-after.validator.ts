@@ -9,8 +9,8 @@ import {
 @ValidatorConstraint({ name: 'isAfter', async: false })
 export class IsAfterConstraint implements ValidatorConstraintInterface {
   validate(propertyValue: Date, args: ValidationArguments) {
-    console.log("propertyValue",propertyValue);
-    console.log("args",args);
+    // console.log("propertyValue",propertyValue);
+    // console.log("args",args);
     const [relatedPropertyName] = args.constraints;
     const relatedValue = (args.object)[relatedPropertyName];
 
