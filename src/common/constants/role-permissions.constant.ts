@@ -11,6 +11,8 @@ export const ROLE_DEFAULT_PERMISSIONS: Record<
     { resource: Resource.PRODUCTS, actions: [Action.READ, Action.WRITE, Action.DELETE] },
     { resource: Resource.ORDERS,   actions: [Action.READ, Action.WRITE, Action.DELETE] },
     { resource: Resource.REPORTS,  actions: [Action.READ] },
+    { resource: Resource.MENU,     actions: [Action.READ, Action.WRITE, Action.DELETE] },
+    { resource: Resource.CATEGORY, actions: [Action.READ, Action.WRITE, Action.DELETE] },
   ],
 
   [Role.CASHIER]: [

@@ -1,22 +1,22 @@
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class GetAllDto {
-  @IsOptional()
+ @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(1, { message: 'Page must be at least 1' })
+  @Min(1)
   page?: number = 1;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(1, { message: 'Limit must be at least 1' })
+  @Min(1)
   limit?: number = 10;
 
   @IsOptional()
-  @IsString()
-  sort?: string = 'asc';
+  @IsEnum(['asc', 'desc'],{message:"sort must be asc or desc"})
+  sort?: 'asc' | 'desc' = 'desc';
 
   @IsOptional()
   @IsString()

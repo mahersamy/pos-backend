@@ -1,6 +1,9 @@
 export enum Resource {
-  STAFF     = 'staff',
-  PRODUCTS  = 'products',
-  ORDERS    = 'orders',
-  REPORTS   = 'reports',
+  STAFF = 'staff',
+  USERS = 'users',
+  PRODUCTS = 'products',
+  ORDERS = 'orders',
+  REPORTS = 'reports',
+  MENU = 'menu',
+  CATEGORY = 'category',
 }
