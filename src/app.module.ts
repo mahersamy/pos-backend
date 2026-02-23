@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CloudinaryProvider } from './common/services/cloudinary/cloudinary.provider';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { TimeoutInterceptor, UnifiedResponseInterceptor } from './common';
+import { LoggerMiddleware, TimeoutInterceptor, UnifiedResponseInterceptor } from './common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GlobalModule } from './Modules/global.module';
 import { AuthModule, UserModule, StaffModule } from './Modules/feature.modules';
@@ -43,4 +43,9 @@ import { ConfigModule } from '@nestjs/config';
     CloudinaryProvider,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  // logger middelware
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
