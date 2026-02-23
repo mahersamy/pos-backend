@@ -32,11 +32,11 @@ export class Staff {
   @Prop({ type: Date, required: true })
   DateOfBirth: Date;
 
-  @Prop({ type: Date, required: true })
-  startShiftTiming: Date;
+  @Prop({ type: String, required: true })
+  startShiftTiming: string;
 
-  @Prop({ type: Date, required: true })
-  endShiftTiming: Date;
+  @Prop({ type: String, required: true })
+  endShiftTiming: string;
 
   @Prop({ type: String })
   details: string;
@@ -48,4 +48,4 @@ export class Staff {
 export const StaffSchema = SchemaFactory.createForClass(Staff);
 
 // indexs
-StaffSchema.index({email: 1,phoneNumber:1})
+StaffSchema.index({ email: 1, phoneNumber: 1 });

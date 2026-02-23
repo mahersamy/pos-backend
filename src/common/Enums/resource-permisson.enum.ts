@@ -6,4 +6,6 @@ export enum Resource {
   REPORTS = 'reports',
   MENU = 'menu',
   CATEGORY = 'category',
+  RESERVATION = 'reservation',
+  INVENTORY = 'inventory',
 }

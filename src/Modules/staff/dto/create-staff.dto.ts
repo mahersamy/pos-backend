@@ -9,7 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsAfter } from '../../../common';
+import { IsTimeFormat } from '../../../common';
 
 export class CreateStaffDto {
   @IsNotEmpty()
@@ -48,15 +48,14 @@ export class CreateStaffDto {
   DateOfBirth: Date;
 
   @IsNotEmpty()
-  @Type(() => Date)
-  @IsDate()
-  startShiftTiming: Date;
+  @IsString()
+  @IsTimeFormat()
+  startShiftTiming: string;
 
   @IsNotEmpty()
-  @Type(() => Date)
-  @IsDate()
-  @IsAfter('startShiftTiming')
-  endShiftTiming: Date;
+  @IsString()
+  @IsTimeFormat()
+  endShiftTiming: string;
 
   @IsOptional()
   @IsString()
