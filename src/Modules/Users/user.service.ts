@@ -13,7 +13,7 @@ import {
   HashService,
   ROLE_DEFAULT_PERMISSIONS,
   EncryptionService,
-} from 'src/common';
+} from '../../common';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';

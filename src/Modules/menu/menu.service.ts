@@ -11,7 +11,7 @@ import {
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { GetAllMenuDto } from './dto/get-all-menu.dto';
-import type { UserDocument } from 'src/DB/Models/users.model';
+import type { UserDocument } from '../../DB/Models/users.model';
 
 @Injectable()
 export class MenuService {

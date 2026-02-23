@@ -1,6 +1,6 @@
 import { IsArray, IsEnum, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Resource, Action } from 'src/common/Enums';
+import { Resource, Action } from '../../../common/Enums';
 
 class PermissionItemDto {
   @IsEnum(Resource)

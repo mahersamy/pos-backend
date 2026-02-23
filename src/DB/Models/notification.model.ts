@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
-import { sendOrderNotification } from 'src/common/utils/email';
-import { emailEvent } from 'src/common/utils/email/email.event';
+import { sendOrderNotification } from '../../common/utils/email';
+import { emailEvent } from '../../common/utils/email/email.event';
 
 export type NotificationDocument = HydratedDocument<Notification>;
 

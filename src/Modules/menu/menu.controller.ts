@@ -19,9 +19,9 @@ import {
   ParamIdDto,
   Resource,
   Role,
-} from 'src/common';
-import { AuthApply } from 'src/common/Decorators/authApply.decorator';
-import type { UserDocument } from 'src/DB/Models/users.model';
+} from '../../common';
+import { AuthApply } from '../../common/Decorators/authApply.decorator';
+import type { UserDocument } from '../../DB/Models/users.model';
 
 @AuthApply({ roles: [] })
 @Controller('menus')

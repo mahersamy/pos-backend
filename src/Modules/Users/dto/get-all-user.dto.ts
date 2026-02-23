@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional } from 'class-validator';
-import { GetAllDto } from 'src/common/Dto/get-all.dto';
-import { Role } from 'src/common';
+import { GetAllDto } from '../../../common/Dto/get-all.dto';
+import { Role } from '../../../common';
 
 export class GetAllUserDto extends GetAllDto {
   @IsOptional()

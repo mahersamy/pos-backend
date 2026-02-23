@@ -13,7 +13,7 @@ import {
   IsStrongPassword,
   IsArray,
 } from 'class-validator';
-import { Action, Resource } from 'src/common';
+import { Action, Resource } from '../../common';
 
 @ValidatorConstraint({ name: 'isMatch', async: false })
 export class IsMatchConstraint implements ValidatorConstraintInterface {
@@ -63,7 +63,6 @@ export class RegisterBodyDto {
   @IsOptional()
   profilePicture: string;
 
-
   @Min(14, { message: 'age must be at least 14' })
   age: number;
 }
@@ -77,7 +76,3 @@ export class LoginBodyDto {
   @IsNotEmpty()
   password: string;
 }
-
-
-
-

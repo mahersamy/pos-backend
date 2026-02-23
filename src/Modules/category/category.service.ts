@@ -14,7 +14,7 @@ import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.s
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { GetAllCategoryDto } from './dto/get-all-category.dto';
-import type { UserDocument } from 'src/DB/Models/users.model';
+import type { UserDocument } from '../../DB/Models/users.model';
 
 @Injectable()
 export class CategoryService {

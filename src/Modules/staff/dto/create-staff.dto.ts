@@ -9,7 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsAfter } from 'src/common';
+import { IsAfter } from '../../../common';
 
 export class CreateStaffDto {
   @IsNotEmpty()

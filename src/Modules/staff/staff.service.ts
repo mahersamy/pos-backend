@@ -8,7 +8,7 @@ import { isValidObjectId } from 'mongoose';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffRepository } from '../../DB/Repository/staff.repository';
-import type { UserDocument } from 'src/DB/Models/users.model';
+import type { UserDocument } from '../../DB/Models/users.model';
 import { GetAllStaffDto } from './dto/get-all-staff.dto';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 
@@ -94,7 +94,9 @@ export class StaffService {
         _id: { $ne: id },
       });
       if (emailExists) {
-        throw new ConflictException('Email already in use by another staff member');
+        throw new ConflictException(
+          'Email already in use by another staff member',
+        );
       }
     }
 

@@ -20,9 +20,9 @@ import {
   Resource,
   Role,
   UploadedFilesValidated,
-} from 'src/common';
-import { AuthApply } from 'src/common/Decorators/authApply.decorator';
-import type { UserDocument } from 'src/DB/Models/users.model';
+} from '../../common';
+import { AuthApply } from '../../common/Decorators/authApply.decorator';
+import type { UserDocument } from '../../DB/Models/users.model';
 import { GetAllStaffDto } from './dto/get-all-staff.dto';
 
 @AuthApply({ roles: [Role.ADMIN, Role.MANAGER] })

@@ -1,6 +1,6 @@
 import { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { OtpType } from 'src/common';
+import { OtpType } from '../../common';
 
 export type OtpDocument = HydratedDocument<Otp>;
 
