@@ -21,7 +21,7 @@ import {
   UploadedFilesValidated,
 } from '../../common';
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
-import { User } from '../../DB/Models/users.model';
+import type { UserDocument } from '../../DB/Models/users.model';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AddPermissonDto } from './dto/add-permisson.dto';
@@ -35,8 +35,9 @@ export class UserController {
   // ─── PROFILE (no role restriction) ───────────────────────────────────────
   @AuthApply({ tokenType: tokenTypeEnum.Access, roles: [] })
   @Get('profile')
-  profile(@AuthUser() user: User) {
-    return user;
+  profile(@AuthUser() user: UserDocument) {
+    const {firstName ,lastName ,email ,phoneNumber ,role,permissions ,profilePicture ,_id} = user;
+    return {firstName ,lastName ,email ,phoneNumber ,role,permissions ,profilePicture ,_id};
   }
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
