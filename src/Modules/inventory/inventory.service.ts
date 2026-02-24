@@ -41,7 +41,7 @@ export class InventoryService {
   }
 
   async findAll(query: GetAllInventoryDto) {
-    const { page, limit, sort, search, categoryId, stock, status, perishable } =
+    const { page, limit, sort, search, categoryId, status } =
       query;
 
     const filter: QueryFilter<InventoryDocument> = {};
@@ -57,17 +57,12 @@ export class InventoryService {
       filter.category = categoryId;
     }
 
-    if (stock) {
-      filter.stock = stock;
-    }
+ 
 
     if (status) {
       filter.status = status;
     }
 
-    if (perishable !== undefined) {
-      filter.perishable = perishable;
-    }
 
     return this._inventoryRepository.paginate(filter, {
       page,
