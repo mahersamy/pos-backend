@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { isValidObjectId, QueryFilter } from 'mongoose';
 import {
   InventoryRepository,
@@ -9,23 +13,28 @@ import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { GetAllInventoryDto } from './dto/get-all-inventory.dto';
 import type { UserDocument } from '../../DB/Models/users.model';
 import { InventoryDocument } from '../../DB/Models/inventory.model';
+import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
+import { CategoryRepository } from '../../DB/Repository/category.repository';
 
 @Injectable()
 export class InventoryService {
-  constructor(private readonly _inventoryRepository: InventoryRepository) {}
+  constructor(
+    private readonly _inventoryRepository: InventoryRepository,
+    private readonly cloudinaryService: CloudinaryService,
+    private readonly categoryRepository: CategoryRepository,
+  ) {}
 
-  async create(dto: CreateInventoryDto, user: UserDocument, image?: any) {
+  async create(dto: CreateInventoryDto, user: UserDocument) {
+    // Check if category exists
+    const category = await this.categoryRepository.findById(dto.category);
+    if (!category) {
+      throw new BadRequestException('Invalid category ID provided');
+    }
+
     const payload: any = {
       ...dto,
       createdBy: user._id,
     };
-
-    if (image) {
-      payload.image = {
-        secure_url: image.secure_url,
-        public_id: image.public_id,
-      };
-    }
 
     const inventory = await this._inventoryRepository.createAndReturn(payload);
     return inventory;
@@ -80,7 +89,7 @@ export class InventoryService {
     return inventory;
   }
 
-  async update(id: string, dto: UpdateInventoryDto, image?: any) {
+  async update(id: string, dto: UpdateInventoryDto) {
     if (!isValidObjectId(id))
       throw new NotFoundException('Inventory item not found');
 
@@ -88,16 +97,51 @@ export class InventoryService {
     if (!inventory) throw new NotFoundException('Inventory item not found');
 
     const payload: any = { ...dto };
-    if (image) {
-      payload.image = {
-        secure_url: image.secure_url,
-        public_id: image.public_id,
-      };
+
+    if (dto.category) {
+      const category = await this.categoryRepository.findById(dto.category);
+      if (!category) {
+        throw new BadRequestException('Invalid category ID provided');
+      }
     }
 
     const updated = await this._inventoryRepository.findByIdAndUpdate(
       id,
       payload,
+      INVENTORY_QUERY_OPTIONS,
+    );
+
+    return updated;
+  }
+
+  async addImage(id: string, image: Express.Multer.File) {
+    if (!isValidObjectId(id))
+      throw new NotFoundException('Inventory item not found');
+
+    const inventory = await this._inventoryRepository.findById(id);
+    if (!inventory) throw new NotFoundException('Inventory item not found');
+    if (!image) throw new BadRequestException('No image provided');
+
+    if (inventory.image?.public_id) {
+      await this.cloudinaryService.deleteFile(
+        String(inventory.image.public_id),
+      );
+    }
+
+    const [uploaded] = await this.cloudinaryService.uploadFiles([image], {
+      folder: 'inventory',
+      quality: 60,
+      toWebp: true,
+    });
+
+    const updated = await this._inventoryRepository.findByIdAndUpdate(
+      id,
+      {
+        image: {
+          secure_url: uploaded.secure_url,
+          public_id: uploaded.public_id,
+        },
+      },
       INVENTORY_QUERY_OPTIONS,
     );
 
@@ -110,6 +154,12 @@ export class InventoryService {
 
     const inventory = await this._inventoryRepository.findById(id);
     if (!inventory) throw new NotFoundException('Inventory item not found');
+
+    if (inventory.image?.public_id) {
+      await this.cloudinaryService.deleteFile(
+        String(inventory.image.public_id),
+      );
+    }
 
     await this._inventoryRepository.findByIdAndDelete(id);
     return 'Inventory item deleted successfully';

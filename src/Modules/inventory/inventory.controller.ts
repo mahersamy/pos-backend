@@ -17,9 +17,10 @@ import {
   Action,
   AuthUser,
   CheckPermissions,
-  FileUpload,
+  FilesUpload,
   ParamIdDto,
   Resource,
+  UploadedFilesValidated,
 } from '../../common';
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
 import type { UserDocument } from '../../DB/Models/users.model';
@@ -30,14 +31,22 @@ export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @CheckPermissions({ resource: Resource.INVENTORY, actions: [Action.WRITE] })
-  @FileUpload({ fieldName: 'image' })
   @Post()
-  create(
-    @Body() dto: CreateInventoryDto,
-    @AuthUser() user: UserDocument,
-    @UploadedFile() image: Express.Multer.File,
+  create(@Body() dto: CreateInventoryDto, @AuthUser() user: UserDocument) {
+    return this.inventoryService.create(dto, user);
+  }
+
+  @CheckPermissions({
+    resource: Resource.INVENTORY,
+    actions: [Action.WRITE, Action.READ],
+  })
+  @FilesUpload({ fieldName: 'image' })
+  @Patch(':id/image')
+  addImages(
+    @Param() { id }: ParamIdDto,
+    @UploadedFilesValidated() images: Express.Multer.File[],
   ) {
-    return this.inventoryService.create(dto, user, image);
+    return this.inventoryService.addImage(id, images[0]);
   }
 
   @CheckPermissions({ resource: Resource.INVENTORY, actions: [Action.READ] })
@@ -53,14 +62,9 @@ export class InventoryController {
   }
 
   @CheckPermissions({ resource: Resource.INVENTORY, actions: [Action.WRITE] })
-  @FileUpload({ fieldName: 'image' })
   @Patch(':id')
-  update(
-    @Param() { id }: ParamIdDto,
-    @Body() dto: UpdateInventoryDto,
-    @UploadedFile() image: Express.Multer.File,
-  ) {
-    return this.inventoryService.update(id, dto, image);
+  update(@Param() { id }: ParamIdDto, @Body() dto: UpdateInventoryDto) {
+    return this.inventoryService.update(id, dto);
   }
 
   @CheckPermissions({ resource: Resource.INVENTORY, actions: [Action.DELETE] })
