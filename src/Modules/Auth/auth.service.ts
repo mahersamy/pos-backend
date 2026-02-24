@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -27,14 +28,14 @@ export class AuthService {
   async login(user: LoginBodyDto) {
     const existingUser = await this._userRepo.findOne({ email: user.email });
     if (!existingUser) {
-      throw new NotFoundException('User not found');
+      throw new BadRequestException('Invalid password or email');
     }
     const isPasswordMatch = await this._hashService.verify(
       existingUser.password,
       user.password,
     );
     if (!isPasswordMatch) {
-      throw new UnauthorizedException('Invalid password');
+      throw new BadRequestException('Invalid password or email');
     }
     const accessToken = await this._tokenService.generateToken(
       { _id: existingUser._id,
