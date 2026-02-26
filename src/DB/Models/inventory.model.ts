@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
+import { InventoryStatus, InventoryStock } from '../../common';
 
 export type InventoryDocument = HydratedDocument<Inventory>;
 
@@ -14,13 +15,17 @@ export class Inventory {
   @Prop({ type: Number, required: true, default: 0 })
   quantity: number;
 
-  @Prop({ type: String, enum: ['instock', 'outofstock'], default: 'instock' })
+  @Prop({
+    type: String,
+    enum: Object.values(InventoryStock),
+    default: InventoryStock.INSTOCK,
+  })
   stock: string;
 
   @Prop({
     type: String,
-    enum: ['active', 'inactive', 'draft'],
-    default: 'active',
+    enum: Object.values(InventoryStatus),
+    default: InventoryStatus.ACTIVE,
   })
   status: string;
 

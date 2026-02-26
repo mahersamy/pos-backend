@@ -8,8 +8,14 @@ import { Order, OrderSchema } from '../../DB/Models/orders.model';
 import { OrderRepository } from '../../DB/Repository/order.repository';
 
 @Module({
-  imports:[MongooseModule.forFeature([{name:Inventory.name,schema:InventorySchema}]),MongooseModule.forFeature([{name:Order.name,schema:OrderSchema}])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Inventory.name, schema: InventorySchema },
+    ]),
+    MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
+  ],
   controllers: [OrdersController],
-  providers: [OrdersService,InventoryRepository,OrderRepository],
+  providers: [OrdersService, InventoryRepository, OrderRepository],
+  exports: [OrderRepository],
 })
 export class OrdersModule {}

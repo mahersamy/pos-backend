@@ -10,6 +10,7 @@ import {
   ORDER_QUERY_OPTIONS,
 } from '../../DB/Repository/order.repository';
 import { OrderItem } from '../../DB/Models/orders.model';
+import { OrderStatus, InventoryStock } from '../../common';
 
 @Injectable()
 export class OrdersService {
@@ -61,10 +62,17 @@ export class OrdersService {
         quantity: item.quantity,
       });
 
-      // 6️⃣ Decrement stock (IMPORTANT)
+      // 6️⃣ Decrement stock & Update stock status (IMPORTANT)
+      const newQuantity = inventory.quantity - item.quantity;
+      const stockStatus =
+        newQuantity === 0 ? InventoryStock.OUTOFSTOCK : inventory.stock;
+
       await this.inventoryRepo.findOneAndUpdate(
         { _id: inventory._id },
-        { $inc: { quantity: -item.quantity } },
+        {
+          $inc: { quantity: -item.quantity },
+          $set: { stock: stockStatus },
+        },
       );
     }
 
@@ -125,8 +133,8 @@ export class OrdersService {
     }
 
     if (
-      updateOrderDto.status === 'cancelled' &&
-      existingOrder.status !== 'cancelled'
+      updateOrderDto.status === OrderStatus.CANCELLED &&
+      existingOrder.status !== OrderStatus.CANCELLED
     ) {
       if (!updateOrderDto.cancellationReason) {
         throw new BadRequestException(
@@ -137,7 +145,10 @@ export class OrdersService {
       for (const item of existingOrder.orderItems) {
         await this.inventoryRepo.findOneAndUpdate(
           { _id: item.inventory },
-          { $inc: { quantity: item.quantity } },
+          {
+            $inc: { quantity: item.quantity },
+            $set: { stock: InventoryStock.INSTOCK },
+          },
         );
       }
     }

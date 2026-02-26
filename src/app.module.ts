@@ -16,6 +16,7 @@ import {
   StaffModule,
   ReservationModule,
   InventoryModule,
+  DashboardModule,
 } from './Modules/feature.modules';
 import { ConfigModule } from '@nestjs/config';
 
@@ -27,6 +28,7 @@ import { ConfigModule } from '@nestjs/config';
     StaffModule,
     ReservationModule,
     InventoryModule,
+    DashboardModule,
 
     // Config
     ConfigModule.forRoot({

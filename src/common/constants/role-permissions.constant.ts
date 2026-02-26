@@ -32,6 +32,10 @@ export const ROLE_DEFAULT_PERMISSIONS: Record<
       resource: Resource.INVENTORY,
       actions: [Action.READ, Action.WRITE, Action.DELETE],
     },
+    {
+      resource: Resource.DASHBOARD,
+      actions: [Action.READ],
+    },
   ],
 
   [Role.CASHIER]: [

@@ -1,12 +1,13 @@
 import { IsEnum, IsOptional } from 'class-validator';
 import { GetAllDto } from '../../../common/Dto/get-all.dto';
+import { OrderStatus, OrderType } from '../../../common';
 
 export class GetAllOrderDto extends GetAllDto {
   @IsOptional()
-  @IsEnum(['in_process', 'completed', 'cancelled', 'ready'])
+  @IsEnum(OrderStatus, { message: 'please choose a valid status' })
   status?: string;
 
   @IsOptional()
-  @IsEnum(['dine_in', 'delivery'])
+  @IsEnum(OrderType, { message: 'please choose a valid order type' })
   orderType?: string;
 }

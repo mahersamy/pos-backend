@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
+import { OrderStatus, OrderType } from '../../common';
 
 export type OrderDocument = HydratedDocument<Order>;
 export type OrderItemDocument = HydratedDocument<OrderItem>;
@@ -25,8 +26,8 @@ export class Order {
 
   @Prop({
     type: String,
-    enum: ['in_process', 'completed', 'cancelled', 'ready'],
-    default: 'in_process',
+    enum: Object.values(OrderStatus),
+    default: OrderStatus.IN_PROCESS,
   })
   status: string;
 
@@ -35,7 +36,7 @@ export class Order {
 
   @Prop({
     type: String,
-    enum: ['dine_in', 'delivery'],
+    enum: Object.values(OrderType),
     required: true,
   })
   orderType: string;

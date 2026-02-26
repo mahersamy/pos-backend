@@ -5,5 +5,6 @@ export * from './otp.enum';
 export * from './order-status';
 export * from './actions-permisson.enum';
 export * from './resource-permisson.enum';
-
-
+export * from './inventory-stock.enum';
+export * from './inventory-status.enum';
+export * from './order-type.enum';

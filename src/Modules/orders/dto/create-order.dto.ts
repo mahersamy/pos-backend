@@ -9,6 +9,7 @@ import {
   Matches,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { OrderType } from '../../../common';
 
 class InventoryItemDto {
   @IsMongoId()
@@ -25,10 +26,8 @@ export class CreateOrderDto {
   inventory: InventoryItemDto[];
 
   @IsString()
-  @IsEnum(['dine_in', 'delivery'], {
-    message: 'Invalid order type dine_in or delivery',
-  })
-  orderType: string;
+  @IsEnum(OrderType, { message: 'orderType must be a valid enum value' })
+  orderType: OrderType;
 
   @IsString()
   @IsOptional()
