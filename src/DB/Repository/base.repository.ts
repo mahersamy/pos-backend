@@ -117,7 +117,7 @@ export abstract class BaseRepository<T> {
   ): Promise<T | null> {
     const { populate, select, ...queryOptions } = options || {};
     let query = this.model.findOneAndUpdate(filter, update, {
-      new: true,
+      returnDocument: 'after',
       ...queryOptions,
     });
 
@@ -134,7 +134,7 @@ export abstract class BaseRepository<T> {
   ): Promise<T | null> {
     const { populate, select, ...queryOptions } = options || {};
     let query = this.model.findByIdAndUpdate(id, update, {
-      new: true,
+      returnDocument: 'after',
       ...queryOptions,
     });
 

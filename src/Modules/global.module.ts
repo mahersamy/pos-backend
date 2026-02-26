@@ -8,6 +8,7 @@ import { NotificationModule } from './notification/notification.module';
 import { StaffModule } from './staff/staff.module';
 import { CategoryModule } from './category/category.module';
 import { MenuModule } from './menu/menu.module';
+import { OrdersModule } from './orders/orders.module';
 @Global()
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { MenuModule } from './menu/menu.module';
     StaffModule,
     CategoryModule,
     MenuModule,
+    OrdersModule,
   ],
   providers: [UserRepository, TokenService, JwtService],
   exports: [UserRepository, TokenService, JwtService],

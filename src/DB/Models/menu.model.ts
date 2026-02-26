@@ -5,7 +5,13 @@ export type MenuDocument = HydratedDocument<Menu>;
 
 @Schema({ timestamps: true })
 export class Menu {
-  @Prop({ type: String, required: true, trim: true, lowercase: true })
+  @Prop({
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true,
+    index: true,
+  })
   name: string;
 
   @Prop({ type: String, trim: true })
@@ -19,4 +25,3 @@ export class Menu {
 }
 
 export const MenuSchema = SchemaFactory.createForClass(Menu);
-MenuSchema.index({ name: 1 }, { unique: true });
