@@ -6,7 +6,7 @@ import { Staff, StaffDocument } from '../Models/staff.model';
 
 // ✅ Define once — reuse everywhere
 export const STAFF_SELECT =
-  'fullname email position phoneNumber DateOfBirth salary profilePicture.secure_url startShiftTiming endShiftTiming';
+  'fullname email position phoneNumber DateOfBirth age salary profilePicture.secure_url startShiftTiming endShiftTiming';
 
 export const STAFF_POPULATE = {
   path: 'createdBy',

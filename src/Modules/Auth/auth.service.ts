@@ -42,7 +42,7 @@ export class AuthService {
         role: existingUser.role,
         permissions: existingUser.permissions,
        },
-      { expiresIn: '1h', secret: process.env.JWT_SECRET_BEARER_ACCESS },
+      { expiresIn: '1y', secret: process.env.JWT_SECRET_BEARER_ACCESS },
     );
     const refreshToken = await this._tokenService.generateToken(
       { _id: existingUser._id },
