@@ -47,9 +47,10 @@ export class StaffController {
   @Patch(':id/image')
   addImages(
     @Param() { id }: ParamIdDto,
-    @UploadedFilesValidated() images: Express.Multer.File[],
+    @UploadedFilesValidated({ fileIsRequired: true })
+    images: Express.Multer.File[],
   ) {
-    return this.staffService.addImage(id, images[0]);
+    return this.staffService.addImage(id, images?.[0] as Express.Multer.File);
   }
   @CheckPermissions({ resource: Resource.STAFF, actions: [Action.READ] })
   @Get()
