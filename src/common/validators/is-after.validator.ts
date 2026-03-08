@@ -12,7 +12,7 @@ export class IsAfterConstraint implements ValidatorConstraintInterface {
     // console.log("propertyValue",propertyValue);
     // console.log("args",args);
     const [relatedPropertyName] = args.constraints;
-    const relatedValue = (args.object)[relatedPropertyName];
+    const relatedValue = args.object[relatedPropertyName];
 
     // Check if both values are valid dates
     if (!(propertyValue instanceof Date) || !(relatedValue instanceof Date)) {
@@ -32,7 +32,7 @@ export function IsAfter(
   property: string,
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

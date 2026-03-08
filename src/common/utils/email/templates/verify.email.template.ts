@@ -1,5 +1,8 @@
-export const verifyEmailTemplate = (otp:string,title="Email Confirmation")=>{
-    return `
+export const verifyEmailTemplate = (
+  otp: string,
+  title = 'Email Confirmation',
+) => {
+  return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -49,4 +52,4 @@ export const verifyEmailTemplate = (otp:string,title="Email Confirmation")=>{
     </body>
     </html>
   `;
-}
+};

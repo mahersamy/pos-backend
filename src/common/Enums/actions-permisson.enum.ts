@@ -1,5 +1,5 @@
 export enum Action {
-  READ   = 'read',
+  READ = 'read',
   WRITE = 'write',
   DELETE = 'delete',
 }

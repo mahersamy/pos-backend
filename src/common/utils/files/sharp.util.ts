@@ -13,13 +13,7 @@ export const compressImage = async (
   fileBuffer: Buffer,
   options: CompressImageOptions,
 ): Promise<Buffer> => {
-  const {
-    maxWidth,
-    maxHeight,
-    quality = 70,
-    fit = 'cover',
-    toWebp,
-  } = options;
+  const { maxWidth, maxHeight, quality = 70, fit = 'cover', toWebp } = options;
 
   let sharpInstance = sharp(fileBuffer, { failOnError: false }).rotate();
 

@@ -1,4 +1,4 @@
-import { HashService } from "../..";
+import { HashService } from '../..';
 
 export interface OtpResult {
   otp: string;

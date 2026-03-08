@@ -8,7 +8,10 @@ import {
 } from 'cloudinary';
 import * as streamifier from 'streamifier';
 
-import { compressImage, CompressImageOptions } from '../../utils/files/sharp.util';
+import {
+  compressImage,
+  CompressImageOptions,
+} from '../../utils/files/sharp.util';
 
 export type CloudinaryResponse = UploadApiResponse | UploadApiErrorResponse;
 
@@ -42,7 +45,6 @@ export class CloudinaryService {
     });
   }
 
-  
   async uploadFiles(
     files: Express.Multer.File[],
     options?: CompressImageOptions,

@@ -24,7 +24,6 @@ export class AuthService {
     private readonly _encryptionService: EncryptionService,
   ) {}
 
-
   async login(user: LoginBodyDto) {
     const existingUser = await this._userRepo.findOne({ email: user.email });
     if (!existingUser) {
@@ -38,10 +37,11 @@ export class AuthService {
       throw new BadRequestException('Invalid password or email');
     }
     const accessToken = await this._tokenService.generateToken(
-      { _id: existingUser._id,
+      {
+        _id: existingUser._id,
         role: existingUser.role,
         permissions: existingUser.permissions,
-       },
+      },
       { expiresIn: '1y', secret: process.env.JWT_SECRET_BEARER_ACCESS },
     );
     const refreshToken = await this._tokenService.generateToken(

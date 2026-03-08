@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { isValidObjectId, QueryFilter } from 'mongoose';
 import {
   ReservationRepository,
@@ -9,7 +13,6 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { GetAllReservationDto } from './dto/get-all-reservation.dto';
 import type { UserDocument } from '../../DB/Models/users.model';
 import { ReservationDocument } from 'src/DB/Models/reservation.model';
-import { FindOptions } from 'src/DB/Repository/base.repository';
 
 @Injectable()
 export class ReservationService {

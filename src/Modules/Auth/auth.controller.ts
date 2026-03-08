@@ -6,8 +6,6 @@ import { LoginBodyDto, RegisterBodyDto } from './auth.dto';
 export class AuthController {
   constructor(private readonly _authService: AuthService) {}
 
-
-
   @Post('login')
   @HttpCode(HttpStatus.OK)
   login(@Body() body: LoginBodyDto) {

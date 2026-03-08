@@ -50,7 +50,7 @@ export class StaffController {
     @UploadedFilesValidated({ fileIsRequired: true })
     images: Express.Multer.File[],
   ) {
-    return this.staffService.addImage(id, images?.[0] as Express.Multer.File);
+    return this.staffService.addImage(id, images?.[0]);
   }
   @CheckPermissions({ resource: Resource.STAFF, actions: [Action.READ] })
   @Get()

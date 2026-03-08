@@ -12,9 +12,8 @@ export const AuthApply = ({
   roles?: Role[];
 }) => {
   return applyDecorators(
-    UseGuards(AuthGuard, AuthorizationGuard,PermissionGuard),
+    UseGuards(AuthGuard, AuthorizationGuard, PermissionGuard),
     Token(tokenType),
     Roles(roles),
-    
   );
 };

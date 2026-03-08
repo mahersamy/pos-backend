@@ -48,5 +48,4 @@ export class Reservation {
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);
 
-
 ReservationSchema.index({ reservationDate: 1 });

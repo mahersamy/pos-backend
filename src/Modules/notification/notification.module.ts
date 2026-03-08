@@ -7,6 +7,7 @@ import {
   Notification,
   NotificationSchema,
 } from '../../DB/Models/notification.model';
+import { FirebaseService } from '../../common/services/firebase/firebase.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import {
     ]),
   ],
   controllers: [NotificationController],
-  providers: [NotificationService, NotificationRepository],
+  providers: [NotificationService, NotificationRepository, FirebaseService],
   exports: [NotificationService],
 })
 export class NotificationModule {}

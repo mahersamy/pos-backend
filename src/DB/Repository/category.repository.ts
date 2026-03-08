@@ -8,7 +8,7 @@ export const CATEGORY_SELECT =
   'name description isActive image.secure_url menu createdAt';
 export const CATEGORY_POPULATE = [
   { path: 'menu', select: 'name isActive' },
-//   { path: 'createdBy', select: 'firstName lastName email' },
+  //   { path: 'createdBy', select: 'firstName lastName email' },
 ];
 export const CATEGORY_QUERY_OPTIONS = {
   select: CATEGORY_SELECT,

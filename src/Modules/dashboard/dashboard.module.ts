@@ -5,7 +5,7 @@ import { DashboardController } from './dashboard.controller';
 import { InventoryModule } from '../inventory/inventory.module';
 
 @Module({
-  imports: [OrdersModule,InventoryModule],
+  imports: [OrdersModule, InventoryModule],
   controllers: [DashboardController],
   providers: [DashboardService],
 })

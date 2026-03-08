@@ -8,6 +8,7 @@ export type NotificationDocument = HydratedDocument<Notification>;
 export enum NotificationChannel {
   EMAIL = 'email',
   IN_APP = 'in_app',
+  PUSH = 'push',
 }
 
 export enum NotificationType {
@@ -76,7 +77,11 @@ export class Notification {
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);
 
-// Index for faster queries
+// Index for faster queries and TTL for automatic deletion after 30 days
+NotificationSchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: 60 * 60 * 24 * 30 },
+);
 NotificationSchema.index({ userId: 1, createdAt: -1 });
 NotificationSchema.index({ userId: 1, status: 1 });
 

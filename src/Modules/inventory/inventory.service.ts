@@ -41,8 +41,7 @@ export class InventoryService {
   }
 
   async findAll(query: GetAllInventoryDto) {
-    const { page, limit, sort, search, categoryId, status } =
-      query;
+    const { page, limit, sort, search, categoryId, status } = query;
 
     const filter: QueryFilter<InventoryDocument> = {};
 
@@ -57,12 +56,9 @@ export class InventoryService {
       filter.category = categoryId;
     }
 
- 
-
     if (status) {
       filter.status = status;
     }
-
 
     return this._inventoryRepository.paginate(filter, {
       page,

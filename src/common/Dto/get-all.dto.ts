@@ -2,7 +2,7 @@ import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class GetAllDto {
- @IsOptional()
+  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
@@ -15,11 +15,10 @@ export class GetAllDto {
   limit?: number = 10;
 
   @IsOptional()
-  @IsEnum(['asc', 'desc'],{message:"sort must be asc or desc"})
+  @IsEnum(['asc', 'desc'], { message: 'sort must be asc or desc' })
   sort?: 'asc' | 'desc' = 'desc';
 
   @IsOptional()
   @IsString()
   search?: string;
-
 }

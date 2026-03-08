@@ -36,8 +36,26 @@ export class UserController {
   @AuthApply({ tokenType: tokenTypeEnum.Access, roles: [] })
   @Get('profile')
   profile(@AuthUser() user: UserDocument) {
-    const {firstName ,lastName ,email ,phoneNumber ,role,permissions ,profilePicture ,_id} = user;
-    return {firstName ,lastName ,email ,phoneNumber ,role,permissions ,profilePicture ,_id};
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      role,
+      permissions,
+      profilePicture,
+      _id,
+    } = user;
+    return {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      role,
+      permissions,
+      profilePicture,
+      _id,
+    };
   }
 
   // ─── CREATE ───────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
-import { Expose } from "class-transformer";
-import { Action, Resource, Role } from "src/common";
+import { Expose } from 'class-transformer';
+import { Action, Resource, Role } from 'src/common';
 
 export class UserProfileResponseDto {
   @Expose()
