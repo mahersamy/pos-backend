@@ -1,15 +1,16 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { CloudinaryProvider } from './common/services/cloudinary/cloudinary.provider';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { MiddlewareConsumer, Module } from "@nestjs/common";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { CloudinaryProvider } from "./common/services/cloudinary/cloudinary.provider";
+import { APP_INTERCEPTOR } from "@nestjs/core";
 import {
   LoggerMiddleware,
   TimeoutInterceptor,
   UnifiedResponseInterceptor,
-} from './common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { GlobalModule } from './Modules/global.module';
+  AuditLogInterceptor,
+} from "./common";
+import { MongooseModule } from "@nestjs/mongoose";
+import { GlobalModule } from "./Modules/global.module";
 import {
   AuthModule,
   UserModule,
@@ -17,8 +18,11 @@ import {
   ReservationModule,
   InventoryModule,
   DashboardModule,
-} from './Modules/feature.modules';
-import { ConfigModule } from '@nestjs/config';
+  AuditLogModule,
+} from "./Modules/feature.modules";
+import { ConfigModule } from "@nestjs/config";
+
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
@@ -29,11 +33,13 @@ import { ConfigModule } from '@nestjs/config';
     ReservationModule,
     InventoryModule,
     DashboardModule,
+    AuditLogModule,
+    ScheduleModule.forRoot(),
 
     // Config
     ConfigModule.forRoot({
       isGlobal: true, // makes it available app-wide (no need to import in every module)
-      envFilePath: '.env', // default, can specify other paths
+      envFilePath: ".env", // default, can specify other paths
     }),
 
     // Database
@@ -52,6 +58,10 @@ import { ConfigModule } from '@nestjs/config';
       provide: APP_INTERCEPTOR,
       useClass: TimeoutInterceptor,
     },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: AuditLogInterceptor,
+    // },
 
     // Cloudinary
     CloudinaryProvider,
@@ -60,6 +70,6 @@ import { ConfigModule } from '@nestjs/config';
 export class AppModule {
   // logger middelware
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(LoggerMiddleware).forRoutes("*");
   }
 }

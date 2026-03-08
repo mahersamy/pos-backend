@@ -2,19 +2,23 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-} from '@nestjs/common';
-import { isValidObjectId, QueryFilter } from 'mongoose';
+} from "@nestjs/common";
+import { isValidObjectId, QueryFilter } from "mongoose";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import {
   InventoryRepository,
   INVENTORY_QUERY_OPTIONS,
-} from '../../DB/Repository/inventory.repository';
-import { CreateInventoryDto } from './dto/create-inventory.dto';
-import { UpdateInventoryDto } from './dto/update-inventory.dto';
-import { GetAllInventoryDto } from './dto/get-all-inventory.dto';
-import type { UserDocument } from '../../DB/Models/users.model';
-import { InventoryDocument } from '../../DB/Models/inventory.model';
-import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
-import { CategoryRepository } from '../../DB/Repository/category.repository';
+} from "../../DB/Repository/inventory.repository";
+import { CreateInventoryDto } from "./dto/create-inventory.dto";
+import { UpdateInventoryDto } from "./dto/update-inventory.dto";
+import { GetAllInventoryDto } from "./dto/get-all-inventory.dto";
+import type { UserDocument } from "../../DB/Models/users.model";
+import { InventoryDocument } from "../../DB/Models/inventory.model";
+import { CloudinaryService } from "../../common/services/cloudinary/cloudinary.service";
+import { CategoryRepository } from "../../DB/Repository/category.repository";
+import { UserRepository } from "../../DB/Repository/user.repository";
+import { Role } from "../../common";
+import { sendLowStockNotification } from "../../common/utils/email/send.email";
 
 @Injectable()
 export class InventoryService {
@@ -22,13 +26,14 @@ export class InventoryService {
     private readonly _inventoryRepository: InventoryRepository,
     private readonly cloudinaryService: CloudinaryService,
     private readonly categoryRepository: CategoryRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async create(dto: CreateInventoryDto, user: UserDocument) {
     // Check if category exists
     const category = await this.categoryRepository.findById(dto.category);
     if (!category) {
-      throw new BadRequestException('Invalid category ID provided');
+      throw new BadRequestException("Invalid category ID provided");
     }
 
     const payload: any = {
@@ -47,7 +52,7 @@ export class InventoryService {
 
     if (search) {
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
+        { name: { $regex: search, $options: "i" } },
         ...(isValidObjectId(search) ? [{ _id: search }] : []),
       ];
     }
@@ -63,36 +68,36 @@ export class InventoryService {
     return this._inventoryRepository.paginate(filter, {
       page,
       limit,
-      sort: sort === 'asc' ? { createdAt: 1 } : { createdAt: -1 },
+      sort: sort === "asc" ? { createdAt: 1 } : { createdAt: -1 },
       ...INVENTORY_QUERY_OPTIONS,
     });
   }
 
   async findOne(id: string) {
     if (!isValidObjectId(id))
-      throw new NotFoundException('Inventory item not found');
+      throw new NotFoundException("Inventory item not found");
     const inventory = await this._inventoryRepository.findById(
       id,
       {},
       INVENTORY_QUERY_OPTIONS,
     );
-    if (!inventory) throw new NotFoundException('Inventory item not found');
+    if (!inventory) throw new NotFoundException("Inventory item not found");
     return inventory;
   }
 
   async update(id: string, dto: UpdateInventoryDto) {
     if (!isValidObjectId(id))
-      throw new NotFoundException('Inventory item not found');
+      throw new NotFoundException("Inventory item not found");
 
     const inventory = await this._inventoryRepository.findById(id);
-    if (!inventory) throw new NotFoundException('Inventory item not found');
+    if (!inventory) throw new NotFoundException("Inventory item not found");
 
     const payload: any = { ...dto };
 
     if (dto.category) {
       const category = await this.categoryRepository.findById(dto.category);
       if (!category) {
-        throw new BadRequestException('Invalid category ID provided');
+        throw new BadRequestException("Invalid category ID provided");
       }
     }
 
@@ -107,11 +112,11 @@ export class InventoryService {
 
   async addImage(id: string, image: Express.Multer.File) {
     if (!isValidObjectId(id))
-      throw new NotFoundException('Inventory item not found');
+      throw new NotFoundException("Inventory item not found");
 
     const inventory = await this._inventoryRepository.findById(id);
-    if (!inventory) throw new NotFoundException('Inventory item not found');
-    if (!image) throw new BadRequestException('No image provided');
+    if (!inventory) throw new NotFoundException("Inventory item not found");
+    if (!image) throw new BadRequestException("No image provided");
 
     if (inventory.image?.public_id) {
       await this.cloudinaryService.deleteFile(
@@ -120,7 +125,7 @@ export class InventoryService {
     }
 
     const [uploaded] = await this.cloudinaryService.uploadFiles([image], {
-      folder: 'inventory',
+      folder: "inventory",
       quality: 60,
       toWebp: true,
     });
@@ -141,10 +146,10 @@ export class InventoryService {
 
   async remove(id: string) {
     if (!isValidObjectId(id))
-      throw new NotFoundException('Inventory item not found');
+      throw new NotFoundException("Inventory item not found");
 
     const inventory = await this._inventoryRepository.findById(id);
-    if (!inventory) throw new NotFoundException('Inventory item not found');
+    if (!inventory) throw new NotFoundException("Inventory item not found");
 
     if (inventory.image?.public_id) {
       await this.cloudinaryService.deleteFile(
@@ -153,6 +158,47 @@ export class InventoryService {
     }
 
     await this._inventoryRepository.findByIdAndDelete(id);
-    return 'Inventory item deleted successfully';
+    return "Inventory item deleted successfully";
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async checkLowStockAndNotify() {
+    const lowStockThreshold = 10;
+
+    // 1. Find items with low stock
+    const lowStockItems = await this._inventoryRepository.find({
+      quantity: { $lte: lowStockThreshold },
+    });
+
+    if (!lowStockItems || lowStockItems.length === 0) {
+      console.log("✅ No low stock items found.");
+      return;
+    }
+
+    // 2. Map necessary item details for the email
+    const itemsData = lowStockItems.map((item) => ({
+      id: String(item._id),
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+
+    // 3. Find all admins and managers
+    const adminsAndManagers = await this.userRepository.find({
+      role: { $in: [Role.ADMIN, Role.MANAGER] },
+    });
+
+    if (!adminsAndManagers || adminsAndManagers.length === 0) {
+      console.log(
+        "⚠️ Low stock detected, but no Admins or Managers found to notify.",
+      );
+      return;
+    }
+
+    // 4. Extract emails
+    const emails = adminsAndManagers.map((user) => user.email);
+
+    // 5. Send notification
+    await sendLowStockNotification(emails, itemsData);
   }
 }
