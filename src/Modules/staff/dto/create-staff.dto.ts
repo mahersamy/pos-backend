@@ -24,10 +24,6 @@ export class CreateStaffDto {
   @IsString()
   position: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(18, { message: 'Age must be at least 18' })
-  age: number;
 
   @IsNotEmpty()
   @IsString()

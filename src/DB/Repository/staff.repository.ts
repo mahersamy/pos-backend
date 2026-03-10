@@ -1,16 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
-import { BaseRepository } from './base.repository';
-import { InjectModel } from '@nestjs/mongoose';
-import { Staff, StaffDocument } from '../Models/staff.model';
+import { Injectable } from "@nestjs/common";
+import { Model } from "mongoose";
+import { BaseRepository } from "./base.repository";
+import { InjectModel } from "@nestjs/mongoose";
+import { Staff, StaffDocument } from "../Models/staff.model";
 
 // ✅ Define once — reuse everywhere
 export const STAFF_SELECT =
-  'fullname email position phoneNumber DateOfBirth age salary profilePicture.secure_url startShiftTiming endShiftTiming';
+  "fullname email position phoneNumber DateOfBirth age salary profilePicture.secure_url startShiftTiming endShiftTiming";
 
 export const STAFF_POPULATE = {
-  path: 'createdBy',
-  select: 'firstName lastName email',
+  path: "createdBy",
+  select: "firstName lastName email",
 };
 
 @Injectable()

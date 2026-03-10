@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { Prop, Schema, SchemaFactory, Virtual } from "@nestjs/mongoose";
+import { HydratedDocument, Types } from "mongoose";
 
 export type StaffDocument = HydratedDocument<Staff>;
 
@@ -8,14 +8,11 @@ export class Staff {
   @Prop({ required: true, trim: true, lowercase: true })
   fullname: string;
 
-  @Prop({ required: [true, 'Email is required'], unique: true })
+  @Prop({ required: [true, "Email is required"], unique: true })
   email: string;
 
   @Prop({ type: String, required: true })
   position: string;
-
-  @Prop({ type: Number, min: [18, 'Age must be at least 18'], required: true })
-  age: number;
 
   @Prop({ type: String, required: true, maxLength: 15, minLength: 15 })
   phoneNumber: string;
@@ -41,11 +38,22 @@ export class Staff {
   @Prop({ type: String })
   details: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: Types.ObjectId, ref: "User", required: true })
   createdBy: Types.ObjectId;
 }
 
 export const StaffSchema = SchemaFactory.createForClass(Staff);
+
+StaffSchema.virtual("age").get(function () {
+  if (!this.DateOfBirth) return undefined;
+  const today = new Date();
+  let age = today.getFullYear() - this.DateOfBirth.getFullYear();
+  const m = today.getMonth() - this.DateOfBirth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < this.DateOfBirth.getDate())) {
+    age--;
+  }
+  return age;
+});
 
 // indexs
 StaffSchema.index({ email: 1, phoneNumber: 1 });
