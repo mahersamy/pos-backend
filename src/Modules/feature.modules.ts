@@ -7,3 +7,4 @@ export * from "./reservation/reservation.module";
 export * from "./inventory/inventory.module";
 export * from "./dashboard/dashboard.module";
 export * from "./audit-log/audit-log.module";
+export * from "./notification/notification.module";

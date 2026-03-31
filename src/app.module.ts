@@ -19,6 +19,7 @@ import {
   InventoryModule,
   DashboardModule,
   AuditLogModule,
+  NotificationModule,
 } from "./Modules/feature.modules";
 import { ConfigModule } from "@nestjs/config";
 
@@ -34,6 +35,7 @@ import { ScheduleModule } from "@nestjs/schedule";
     InventoryModule,
     DashboardModule,
     AuditLogModule,
+    NotificationModule,
     ScheduleModule.forRoot(),
 
     // Config

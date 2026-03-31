@@ -1,13 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, Types } from 'mongoose';
-import { sendOrderNotification } from '../../common/utils/email';
+import { HydratedDocument, Types } from 'mongoose';
 import { emailEvent } from '../../common/utils/email/email.event';
 
 export type NotificationDocument = HydratedDocument<Notification>;
 
 export enum NotificationChannel {
   EMAIL = 'email',
-  IN_APP = 'in_app',
   PUSH = 'push',
 }
 
@@ -22,6 +20,7 @@ export enum NotificationType {
   PRODUCT_BACK_IN_STOCK = 'product_back_in_stock',
   PRICE_DROP = 'price_drop',
   COUPON_EXPIRING = 'coupon_expiring',
+  PUSH = 'push',
 }
 
 export enum NotificationStatus {
@@ -85,26 +84,26 @@ NotificationSchema.index(
 NotificationSchema.index({ userId: 1, createdAt: -1 });
 NotificationSchema.index({ userId: 1, status: 1 });
 
-NotificationSchema.pre('save', async function () {
-  if (
-    this.type === NotificationType.ORDER_PLACED &&
-    this.channel === NotificationChannel.EMAIL
-  ) {
-    try {
-      emailEvent.emit('sendOrderPlacedNotification', {
-        to: this.recipient,
-        subject: this.title,
-        customerName: this.metadata?.customerName,
-        orderId: this.metadata?.orderId,
-        totalAmount: this.metadata?.totalAmount,
-        items: this.metadata?.items || [], // Ensure items is at least an empty array
-      });
-      this.status = NotificationStatus.SENT;
-      this.sentAt = new Date();
-    } catch (error) {
-      console.error('Error sending email notification:', error);
-      this.status = NotificationStatus.FAILED;
-      this.errorMessage = error.message;
-    }
-  }
-});
+// NotificationSchema.pre('save', async function () {
+//   if (
+//     this.type === NotificationType.ORDER_PLACED &&
+//     this.channel === NotificationChannel.EMAIL
+//   ) {
+//     try {
+//       emailEvent.emit('sendOrderPlacedNotification', {
+//         to: this.recipient,
+//         subject: this.title,
+//         customerName: this.metadata?.customerName,
+//         orderId: this.metadata?.orderId,
+//         totalAmount: this.metadata?.totalAmount,
+//         items: this.metadata?.items || [], // Ensure items is at least an empty array
+//       });
+//       this.status = NotificationStatus.SENT;
+//       this.sentAt = new Date();
+//     } catch (error) {
+//       console.error('Error sending email notification:', error);
+//       this.status = NotificationStatus.FAILED;
+//       this.errorMessage = error.message;
+//     }
+//   }
+// });
