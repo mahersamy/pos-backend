@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "start": "node --max-old-space-size=512 dist/main.js",
+    "seed:admin": "ts-node -r reflect-metadata/Reflect -r tsconfig-paths/register src/scripts/seed-admin.ts",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",

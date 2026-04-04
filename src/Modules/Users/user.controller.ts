@@ -24,6 +24,7 @@ import { AuthApply } from '../../common/Decorators/authApply.decorator';
 import type { UserDocument } from '../../DB/Models/users.model';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { AddPermissonDto } from './dto/add-permisson.dto';
 import { GetAllUserDto } from './dto/get-all-user.dto';
 
@@ -44,6 +45,8 @@ export class UserController {
       role,
       permissions,
       profilePicture,
+      age,
+      address,
       _id,
     } = user;
     return {
@@ -54,6 +57,8 @@ export class UserController {
       role,
       permissions,
       profilePicture,
+      age,
+      address,
       _id,
     };
   }
@@ -80,6 +85,15 @@ export class UserController {
   @Patch(':id')
   update(@Param() { id }: ParamIdDto, @Body() dto: UpdateUserDto) {
     return this._userService.update(id, dto);
+  }
+
+  // ─── UPDATE PASSWORD ──────────────────────────────────────────────────────
+  @Patch(':id/password')
+  updatePassword(
+    @Param() { id }: ParamIdDto,
+    @Body() dto: UpdatePasswordDto,
+  ) {
+    return this._userService.updatePassword(id, dto);
   }
 
   // ─── ADD IMAGE ────────────────────────────────────────────────────────────

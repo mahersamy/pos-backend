@@ -17,6 +17,7 @@ import {
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { AddPermissonDto } from './dto/add-permisson.dto';
 import { GetAllUserDto } from './dto/get-all-user.dto';
 
@@ -142,6 +143,22 @@ export class UserService {
     return updated;
   }
 
+  // ─── UPDATE PASSWORD ──────────────────────────────────────────────────────
+  async updatePassword(id: string, dto: UpdatePasswordDto) {
+    const user = await this._userRepository.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+
+    const hashedPassword = await this._hashService.hash(dto.password);
+
+    await this._userRepository.findByIdAndUpdate(
+      id,
+      { password: hashedPassword },
+      USER_QUERY_OPTIONS,
+    );
+
+    return { message: 'Password updated successfully' };
+  }
+
   // ─── DELETE ───────────────────────────────────────────────────────────────
   async remove(id: string) {
     const user = await this._userRepository.findById(id);
@@ -164,5 +181,9 @@ export class UserService {
     }
 
     return user;
+  }
+
+  getUserLoggedProfile() {
+  
   }
 }

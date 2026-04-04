@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { NOTIFICATION_QUERY_OPTIONS, NotificationRepository } from '../../DB/Repository/notification.repository';
 import { UserRepository } from '../../DB/Repository/user.repository';
 import { FirebaseService } from '../../common/services/firebase/firebase.service';
@@ -8,8 +8,8 @@ import {
   NotificationStatus,
   NotificationDocument,
 } from '../../DB/Models/notification.model';
-import { isValidObjectId, QueryFilter, Types } from 'mongoose';
-import { GetAllNotification } from './dto/get-all-notification.dto';
+import { QueryFilter, Types } from 'mongoose';
+import { GetNotificationsDto } from './dto/get-all-notification.dto';
 import { emailEvent } from '../../common/utils/email/email.event';
 
 @Injectable()
@@ -102,42 +102,64 @@ export class NotificationService {
     return notification;
   }
 
-  async getAllNotifications(query: GetAllNotification) {
 
-    const { page, limit, sort, search, status, type, channel, userId } = query;
-    const filter: QueryFilter<NotificationDocument> = {};
-    if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { message: { $regex: search, $options: 'i' } },
-        ...(isValidObjectId(search) ? [{ _id: search }] : []),
-      ];
-    }
-    if (status) {
-      filter.status = status;
-    }
-    if (type) {
-      filter.type = type;
-    }
-    if (channel) {
-      filter.channel = channel;
-    }
-    if (userId) {
-      filter.userId = userId;
-    }
-    return await this.notificationRepository.paginate(filter, {
-      page,
-      limit,
-      sort: sort === 'asc' ? { createdAt: 1 } : { createdAt: -1 },
-      ...NOTIFICATION_QUERY_OPTIONS,
-    });
+  async deleteNotification(userId: Types.ObjectId, notificationId: Types.ObjectId) {
+    const notification = await this.notificationRepository.findById(notificationId);
+    if (!notification) throw new NotFoundException('Notification not found');
+    if (notification.userId.toString() !== userId.toString()) throw new UnauthorizedException('You are not authorized to delete this notification');
+    await this.notificationRepository.findByIdAndDelete(notificationId);
+    return 'Notification deleted successfully';
   }
 
-  async getUserNotifications(userId: Types.ObjectId) {
-    return await this.notificationRepository.find({
-      userId: userId,
+
+  async markAsRead(userId: Types.ObjectId, notificationIds: Types.ObjectId[]) {
+    const result = await this.notificationRepository.updateMany({ _id: { $in: notificationIds }, userId: userId.toString() }, { status: NotificationStatus.READ, readAt: new Date() });
+    console.log(result)
+    if (result.modifiedCount === 0) {
+      throw new NotFoundException('Notification not found');
+    }
+    return 'Notification marked as read successfully';
+  }
+
+
+  async getUserNotifications(
+    userId: Types.ObjectId,
+    dto: GetNotificationsDto,
+  ) {
+    const { limit, cursor, status } = dto;
+
+    const query: QueryFilter<NotificationDocument> = {
+      userId: userId.toString(),
       channel: NotificationChannel.PUSH,
-    });
+    };
+
+    if (status) {
+      query.status = status;
+    }
+
+    // Cursor: fetch records older than the last seen _id
+    if (cursor) {
+      query._id = { $lt: new Types.ObjectId(cursor) };
+    }
+
+    const raw = await this.notificationRepository.find(
+      query,
+      undefined,
+      {
+        sort: { _id: -1 },
+        limit: limit + 1,
+        ...NOTIFICATION_QUERY_OPTIONS
+      },
+    );
+
+    const hasMore = raw.length > limit;
+    const data = hasMore ? raw.slice(0, limit) : raw;
+
+    return {
+      data,
+      hasMore,
+      nextCursor: hasMore ? (data[data.length - 1])._id.toString() : null,
+    };
   }
 
   async addFcmToken(userId: Types.ObjectId, token: string) {

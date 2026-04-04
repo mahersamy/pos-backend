@@ -7,13 +7,10 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
   Validate,
-  IsEnum,
   IsOptional,
   Min,
   IsStrongPassword,
-  IsArray,
 } from 'class-validator';
-import { Action, Resource } from '../../common';
 
 @ValidatorConstraint({ name: 'isMatch', async: false })
 export class IsMatchConstraint implements ValidatorConstraintInterface {

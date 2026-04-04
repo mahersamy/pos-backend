@@ -1,22 +1,22 @@
-import { GetAllDto } from "../../../common/Dto/get-all.dto";
-import { IsEnum, IsMongoId, IsOptional } from "class-validator";
-import { NotificationChannel, NotificationStatus, NotificationType } from "../../../DB/Models/notification.model";
-import { Types } from "mongoose";
+import { Type } from "class-transformer";
+import { IsEnum, IsInt, IsOptional, IsString, Min } from "class-validator";
+import { NotificationStatus } from "src/DB/Models/notification.model";
 
-export class GetAllNotification extends GetAllDto {
-    @IsOptional()
-    @IsEnum(NotificationType)
-    type?: NotificationType;
+export class GetNotificationsDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit: number = 20;
 
-    @IsOptional()
-    @IsEnum(NotificationStatus)
-    status?: NotificationStatus;
+  // Cursor-based (recommended)
+  @IsOptional()
+  @IsString()
+  cursor?: string; // last notification _id
 
-    @IsOptional()
-    @IsEnum(NotificationChannel)
-    channel?: NotificationChannel;
 
-    @IsOptional()
-    @IsMongoId()
-    userId?: Types.ObjectId;
+  @IsOptional()
+  @IsEnum(NotificationStatus)
+  status?: NotificationStatus;
+
 }

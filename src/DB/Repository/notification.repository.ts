@@ -9,9 +9,15 @@ import {
 
 
 
-export const NOTIFICATION_SELECT = 'title message status type channel userId metadata sentAt errorMessage createdAt updatedAt';
+export const NOTIFICATION_SELECT = 'title message status type channel userId metadata sentAt errorMessage';
 export const NOTIFICATION_QUERY_OPTIONS = {
   select: NOTIFICATION_SELECT,
+  // populate: [
+  //   {
+  //     path: 'userId',
+  //     select: 'firstName lastName email image',
+  //   },
+  // ],
 };
 
 

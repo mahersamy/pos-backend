@@ -1,4 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateNotificationDto } from './create-notification.dto';
+import { Types } from 'mongoose';
+import { IsArray, IsMongoId, IsNotEmpty } from 'class-validator';
 
-export class UpdateNotificationDto extends PartialType(CreateNotificationDto) {}
+export class MarkAsReadNotificationDto {
+
+    @IsArray()
+    @IsMongoId({ each: true })
+    @IsNotEmpty()
+    notificationIds: Types.ObjectId[];
+}

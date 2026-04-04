@@ -4,7 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
 
 @Injectable()
 export class UnifiedResponseInterceptor implements NestInterceptor {
@@ -15,7 +15,12 @@ export class UnifiedResponseInterceptor implements NestInterceptor {
       map((data) => {
         // If the response is already paginated (contains a data array and total count)
         // we spread it to avoid { data: { data: [], total: ... } }
-        if (data && data.data && Array.isArray(data.data) && 'total' in data) {
+        if (
+          data &&
+          data.data &&
+          Array.isArray(data.data) &&
+          ('total' in data || 'hasMore' in data || 'nextCursor' in data)
+        ) {
           return {
             success: true,
             statusCode,

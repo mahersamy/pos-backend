@@ -20,7 +20,7 @@ export enum NotificationType {
   PRODUCT_BACK_IN_STOCK = 'product_back_in_stock',
   PRICE_DROP = 'price_drop',
   COUPON_EXPIRING = 'coupon_expiring',
-  PUSH = 'push',
+  ANNOUNCEMENT = 'announcement',
 }
 
 export enum NotificationStatus {
@@ -57,6 +57,9 @@ export class Notification {
     default: NotificationStatus.PENDING,
   })
   status: NotificationStatus;
+
+  @Prop({ type: Boolean, default: false })
+  isRead: boolean;
 
   @Prop({ type: Object })
   metadata: Record<string, any>; // Additional data (order ID, product ID, etc.)

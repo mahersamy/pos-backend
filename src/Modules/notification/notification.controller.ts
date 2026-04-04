@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Req, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Req, Get, Query, Patch, Delete, Param } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { AuthApply, AuthUser } from '../../common';
+import { AuthApply, AuthUser, ParamIdDto } from '../../common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import type { UserDocument } from '../../DB/Models/users.model';
-import { GetAllNotification } from './dto/get-all-notification.dto';
+import { GetNotificationsDto } from './dto/get-all-notification.dto';
+import { Types } from 'mongoose';
+import { MarkAsReadNotificationDto } from './dto/update-notification.dto';
 
 
 
@@ -36,15 +38,27 @@ export class NotificationController {
     );
   }
 
-
-  @Get()
-  async getAllNotifications(@Query() query: GetAllNotification) {
-    return this.notificationService.getAllNotifications(query);
+  @Get('inbox')
+  async getUserNotifications(@AuthUser() user: UserDocument, @Query() query: GetNotificationsDto) {
+    return this.notificationService.getUserNotifications(user._id, query);
   }
 
-  // @Get(':userId')
-  // async getUserNotifications(@Param('userId') userId: string) {
-  //   return this.notificationService.getUserNotifications(userId);
-  // }
+
+  @Patch('mark-as-read')
+  async markAsRead(
+    @AuthUser() user: UserDocument,
+    @Body() body: MarkAsReadNotificationDto,
+  ) {
+    return this.notificationService.markAsRead(user._id, body.notificationIds);
+  }
+
+  @Delete(':id')
+  async deleteNotification(
+    @AuthUser() user: UserDocument,
+    @Param() param: ParamIdDto,
+  ) {
+    return this.notificationService.deleteNotification(user._id, new Types.ObjectId(param.id));
+  }
+
 
 }
