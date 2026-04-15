@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsInt, IsOptional, IsString, Min } from "class-validator";
+import { IsEnum, IsInt, IsMongoId, IsOptional, ValidateIf, Min } from "class-validator";
 import { NotificationStatus } from "src/DB/Models/notification.model";
 
 export class GetNotificationsDto {
@@ -10,8 +10,8 @@ export class GetNotificationsDto {
   limit: number = 20;
 
   // Cursor-based (recommended)
-  @IsOptional()
-  @IsString()
+  @ValidateIf((object, value) => value !== undefined && value !== null && value !== '')
+  @IsMongoId()
   cursor?: string; // last notification _id
 
 

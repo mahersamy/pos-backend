@@ -24,6 +24,7 @@ import {
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
 import type { UserDocument } from '../../DB/Models/users.model';
 import { GetAllStaffDto } from './dto/get-all-staff.dto';
+import { DeleteManyStaffDto } from './dto/delete-many-staff.dto';
 
 @AuthApply({ roles: [Role.ADMIN, Role.MANAGER] })
 @Controller('staff')
@@ -68,6 +69,12 @@ export class StaffController {
   @Patch(':id')
   update(@Param() { id }: ParamIdDto, @Body() updateStaffDto: UpdateStaffDto) {
     return this.staffService.update(id, updateStaffDto);
+  }
+
+  @CheckPermissions({ resource: Resource.STAFF, actions: [Action.DELETE] })
+  @Delete('delete-many')
+  removeMany(@Body() deleteManyDto: DeleteManyStaffDto) {
+    return this.staffService.removeMany(deleteManyDto.ids);
   }
 
   @CheckPermissions({ resource: Resource.STAFF, actions: [Action.DELETE] })

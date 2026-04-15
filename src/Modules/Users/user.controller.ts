@@ -10,12 +10,9 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
-  Action,
   AuthUser,
-  CheckPermissions,
   FilesUpload,
   ParamIdDto,
-  Resource,
   Role,
   tokenTypeEnum,
   UploadedFilesValidated,

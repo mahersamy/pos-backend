@@ -155,4 +155,31 @@ export class StaffService {
     await this._staffRepository.findByIdAndDelete(id);
     return 'Staff deleted successfully';
   }
+
+  // ─── DELETE MANY ──────────────────────────────────────────────────────────
+  async removeMany(ids: string[]) {
+    // 1. Fetch all staff to be deleted to get their image public_ids
+    const staffMembers = await this._staffRepository.find({ _id: { $in: ids } });
+    if (!staffMembers.length) throw new NotFoundException('No staff found for given IDs');
+
+    // 2. Extract public_ids of images to delete from Cloudinary
+    const publicIds = staffMembers
+      .map(staff => staff.profilePicture?.public_id)
+      .filter(id => id); // filter out undefined/null
+
+    // 3. Delete images from Cloudinary concurrently
+    if (publicIds.length) {
+      await Promise.all(
+        publicIds.map(id => this.cloudinaryService.deleteFile(String(id)))
+      );
+    }
+
+    // 4. Delete the staff records
+    const result = await this._staffRepository.deleteMany({ _id: { $in: ids } });
+
+    return {
+      message: `${result.deletedCount} staff members deleted successfully`,
+      deletedCount: result.deletedCount,
+    };
+  }
 }
