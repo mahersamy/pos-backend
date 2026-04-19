@@ -51,9 +51,9 @@ export class StaffService {
 
   // ─── GET ALL ──────────────────────────────────────────────────────────────
   async findAll(query: GetAllStaffDto) {
-    const { page, limit, sort, search } = query;
+    const { page, limit, sort, search, salary } = query;
 
-    const filter = search
+    const filter:any = search
       ? {
           $or: [
             { fullname: { $regex: search, $options: 'i' } },
@@ -63,6 +63,10 @@ export class StaffService {
           ],
         }
       : {};
+
+      if(salary){
+        filter.salary = salary;
+      }
 
     return await this._staffRepository.paginate(filter, {
       page,

@@ -27,7 +27,7 @@ export class Staff {
   salary: number;
 
   @Prop({ type: Date, required: true })
-  DateOfBirth: Date;
+  dateOfBirth: Date;
 
   @Prop({ type: String, required: true })
   startShiftTiming: string;
@@ -45,11 +45,11 @@ export class Staff {
 export const StaffSchema = SchemaFactory.createForClass(Staff);
 
 StaffSchema.virtual("age").get(function () {
-  if (!this.DateOfBirth) return undefined;
+  if (!this.dateOfBirth) return undefined;
   const today = new Date();
-  let age = today.getFullYear() - this.DateOfBirth.getFullYear();
-  const m = today.getMonth() - this.DateOfBirth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < this.DateOfBirth.getDate())) {
+  let age = today.getFullYear() - this.dateOfBirth.getFullYear();
+  const m = today.getMonth() - this.dateOfBirth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < this.dateOfBirth.getDate())) {
     age--;
   }
   return age;

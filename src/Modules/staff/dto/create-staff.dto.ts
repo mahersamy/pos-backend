@@ -35,13 +35,14 @@ export class CreateStaffDto {
   address?: string;
 
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
   salary: number;
 
   @IsNotEmpty()
   @Type(() => Date)
   @IsDate()
-  DateOfBirth: Date;
+  dateOfBirth: Date;
 
   @IsNotEmpty()
   @IsString()
