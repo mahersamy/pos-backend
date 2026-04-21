@@ -29,7 +29,7 @@ export class StaffService {
   constructor(
     private readonly _staffRepository: StaffRepository,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
   async create(createStaffDto: CreateStaffDto, user: UserDocument) {
@@ -51,29 +51,29 @@ export class StaffService {
 
   // ─── GET ALL ──────────────────────────────────────────────────────────────
   async findAll(query: GetAllStaffDto) {
-    const { page, limit, sort, search, salary } = query;
+    const { page, limit, sort, search, startSalary, endSalary } = query;
 
-    const filter:any = search
+    const filter: any = search
       ? {
-          $or: [
-            { fullname: { $regex: search, $options: 'i' } },
-            { email: { $regex: search, $options: 'i' } },
-            { phoneNumber: { $regex: search, $options: 'i' } },
-            ...(isValidObjectId(search) ? [{ _id: search }] : []),
-          ],
-        }
+        $or: [
+          { fullname: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+          { phoneNumber: { $regex: search, $options: 'i' } },
+          ...(isValidObjectId(search) ? [{ _id: search }] : []),
+        ],
+      }
       : {};
 
-      if(salary){
-        filter.salary = salary;
-      }
-
-    return await this._staffRepository.paginate(filter, {
+    if (startSalary !== undefined && endSalary !== undefined) {
+      filter.salary = { $gte: startSalary, $lte: endSalary };
+    }
+    const result=await this._staffRepository.paginate(filter, {
       page,
       limit,
       sort: sort === 'asc' ? { createdAt: 1 } : { createdAt: -1 },
       ...STAFF_QUERY_OPTIONS, // ✅ reuse
     });
+    return result
   }
 
   // ─── GET ONE ──────────────────────────────────────────────────────────────
