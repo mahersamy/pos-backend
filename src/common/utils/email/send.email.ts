@@ -81,7 +81,7 @@ export async function sendOrderNotification({
   }
 }
 
-export async function sendLowStockNotification(
+export async function sendLowStockEmail(
   to: string | string[],
   items: any[],
 ) {

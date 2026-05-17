@@ -31,6 +31,7 @@ export class AuditLogService {
       performedBy,
       startDate,
       endDate,
+      search,
     } = query;
 
     const filter: Record<string, any> = {};
@@ -38,6 +39,14 @@ export class AuditLogService {
     if (action) filter.action = action;
     if (entity) filter.entity = entity;
     if (performedBy) filter.performedBy = performedBy;
+
+    if (search) {
+      filter.$or = [
+        { action: { $regex: search, $options: "i" } },
+        { entity: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
 
     if (startDate || endDate) {
       filter.createdAt = {};

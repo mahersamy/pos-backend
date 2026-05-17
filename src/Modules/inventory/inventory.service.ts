@@ -18,7 +18,7 @@ import { CloudinaryService } from "../../common/services/cloudinary/cloudinary.s
 import { CategoryRepository } from "../../DB/Repository/category.repository";
 import { UserRepository } from "../../DB/Repository/user.repository";
 import { Role } from "../../common";
-import { sendLowStockNotification } from "../../common/utils/email/send.email";
+import { sendLowStockEmail } from "../../common/utils/email/send.email";
 
 @Injectable()
 export class InventoryService {
@@ -27,7 +27,7 @@ export class InventoryService {
     private readonly cloudinaryService: CloudinaryService,
     private readonly categoryRepository: CategoryRepository,
     private readonly userRepository: UserRepository,
-  ) {}
+  ) { }
 
   async create(dto: CreateInventoryDto, user: UserDocument) {
     // Check if category exists
@@ -199,6 +199,6 @@ export class InventoryService {
     const emails = adminsAndManagers.map((user) => user.email);
 
     // 5. Send notification
-    await sendLowStockNotification(emails, itemsData);
+    await sendLowStockEmail(emails, itemsData);
   }
 }

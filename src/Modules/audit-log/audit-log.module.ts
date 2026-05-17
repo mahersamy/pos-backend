@@ -4,6 +4,7 @@ import { AuditLogRepository } from "../../DB/Repository/audit-log.repository";
 import { AuditLog, AuditLogSchema } from "../../DB/Models/aduit-loggs.model";
 import { AuditLogService } from "./audit-log.service";
 import { AuditLogController } from "./audit-log.controller";
+import { AuditLogEvent } from "./event/audit-log.event";
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { AuditLogController } from "./audit-log.controller";
     ]),
   ],
   controllers: [AuditLogController],
-  providers: [AuditLogService, AuditLogRepository],
+  providers: [AuditLogService, AuditLogRepository, AuditLogEvent],
   exports: [AuditLogService, AuditLogRepository],
 })
 export class AuditLogModule {}

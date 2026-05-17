@@ -20,10 +20,14 @@ import {
   DashboardModule,
   AuditLogModule,
   NotificationModule,
+  MenuModule,
 } from "./Modules/feature.modules";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 
 import { ScheduleModule } from "@nestjs/schedule";
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CacheModule } from "@nestjs/cache-manager";
+import KeyvRedis, { Keyv } from "@keyv/redis";
 
 @Module({
   imports: [
@@ -35,13 +39,52 @@ import { ScheduleModule } from "@nestjs/schedule";
     InventoryModule,
     DashboardModule,
     AuditLogModule,
+    MenuModule,
     NotificationModule,
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
 
     // Config
     ConfigModule.forRoot({
       isGlobal: true, // makes it available app-wide (no need to import in every module)
       envFilePath: ".env", // default, can specify other paths
+    }),
+
+    // Cache
+    CacheModule.registerAsync({
+      isGlobal: true,
+
+      inject: [ConfigService],
+
+      useFactory: async (
+        configService: ConfigService,
+      ) => ({
+        stores: [
+          new Keyv({
+            store: new KeyvRedis({
+              username: configService.get<string>(
+                'REDIS_USERNAME',
+              ),
+
+              password: configService.get<string>(
+                'REDIS_PASSWORD',
+              ),
+
+              socket: {
+                host: configService.get<string>(
+                  'REDIS_HOST',
+                ),
+
+                port: Number(
+                  configService.get<string>(
+                    'REDIS_PORT',
+                  ),
+                ),
+              },
+            }),
+          }),
+        ],
+      }),
     }),
 
     // Database

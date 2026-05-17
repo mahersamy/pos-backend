@@ -6,12 +6,12 @@ import {
 } from "@nestjs/common";
 import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
-import { AuditLogService } from "../../Modules/audit-log/audit-log.service";
 import { AuditAction } from "../../DB/Models/aduit-loggs.model";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 @Injectable()
 export class AuditLogInterceptor implements NestInterceptor {
-  constructor(private readonly auditLogService: AuditLogService) {}
+  constructor(private readonly eventEmitter: EventEmitter2) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
@@ -49,22 +49,16 @@ export class AuditLogInterceptor implements NestInterceptor {
 
           const entityId = data?._id || request.params?.id || null;
 
-          this.auditLogService
-            .createLog({
-              action,
-              entity,
-              entityId,
-              performedBy: userId,
-              ipAddress: ip,
-              userAgent: headers["user-agent"],
-              description: `Successfully executed ${method} on ${originalUrl}`,
-            })
-            .catch((err) =>
-              console.error(
-                "Failed to create basic audit log interceptor",
-                err,
-              ),
-            );
+          void this.eventEmitter.emitAsync('auditLog.created', {
+            action,
+            entity,
+            entityId,
+            performedBy: userId,
+            ipAddress: ip,
+            userAgent: headers["user-agent"],
+            description: `Successfully executed ${method} on ${originalUrl}`,
+            newValue: method === "DELETE" ? null : data,
+          })
         }),
       );
     }

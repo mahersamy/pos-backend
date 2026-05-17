@@ -1,37 +1,54 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class FirebaseService implements OnModuleInit {
+export class FirebaseService {
   private readonly logger = new Logger(FirebaseService.name);
 
-  constructor(private readonly configService: ConfigService) { }
+  constructor(private readonly configService: ConfigService) {
+    this._initializeFirebase();
+  }
 
-  onModuleInit() {
-    if (!admin.apps.length) {
-      const projectId = this.configService.get<string>('FIREBASE_PROJECT_ID');
-      const clientEmail = this.configService.get<string>(
-        'FIREBASE_CLIENT_EMAIL',
-      );
-      const privateKey = this.configService.get<string>('FIREBASE_PRIVATE_KEY');
-
-      if (!projectId || !clientEmail || !privateKey) {
-        this.logger.warn(
-          'Firebase configuration is missing in environment variables. Push notifications will not work.',
-        );
+  /**
+   * Initializes Firebase Admin SDK.
+   * Safe to call multiple times — re-initializes only if needed.
+   * This is critical on Vercel serverless where module lifecycle hooks
+   * (OnModuleInit) may not run on every cold start, but the constructor always does.
+   */
+  private _initializeFirebase() {
+    try {
+      // If a default app already exists and has a valid credential, skip init.
+      if (admin.apps.length > 0) {
+        admin.app(); // will throw if the default app is broken
         return;
       }
-
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId,
-          clientEmail,
-          privateKey: privateKey.replace(/\\n/g, '\n'),
-        }),
-      });
-      this.logger.log('Firebase Admin initialized successfully');
+    } catch {
+      // Default app exists but is broken — delete it so we can re-initialize.
+      this.logger.warn('Firebase default app was broken, re-initializing...');
+      admin.apps.forEach((app) => app?.delete());
     }
+
+    const projectId = this.configService.get<string>('FIREBASE_PROJECT_ID');
+    const clientEmail = this.configService.get<string>('FIREBASE_CLIENT_EMAIL');
+    const privateKey = this.configService.get<string>('FIREBASE_PRIVATE_KEY');
+
+    if (!projectId || !clientEmail || !privateKey) {
+      this.logger.warn(
+        'Firebase configuration is missing in environment variables. Push notifications will not work.',
+      );
+      return;
+    }
+
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey: privateKey.replace(/\\n/g, '\n'),
+      }),
+    });
+
+    this.logger.log('Firebase Admin initialized successfully');
   }
 
   async sendPushNotification(
@@ -43,6 +60,9 @@ export class FirebaseService implements OnModuleInit {
     if (!tokens || tokens.length === 0) {
       return null;
     }
+
+    // Ensure Firebase is initialized before sending (guards against cold starts)
+    this._initializeFirebase();
 
     const message: admin.messaging.MulticastMessage = {
       notification: {
@@ -56,12 +76,12 @@ export class FirebaseService implements OnModuleInit {
     try {
       const response = await admin.messaging().sendEachForMulticast(message);
       if (response.failureCount > 0) {
-        // this.logger.error(`Failed to send ${response.failureCount} messages`);
-        // response.responses.forEach((resp, idx) => {
-        //   if (!resp.success) {
-        //     this.logger.error(`Error for token[${idx}]: `, resp.error);
-        //   }
-        // });
+        this.logger.warn(`FCM: ${response.failureCount} of ${tokens.length} messages failed`);
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            this.logger.error(`FCM error for token[${idx}]: ${resp.error?.message}`);
+          }
+        });
       }
       return response;
     } catch (error) {
@@ -70,3 +90,4 @@ export class FirebaseService implements OnModuleInit {
     }
   }
 }
+

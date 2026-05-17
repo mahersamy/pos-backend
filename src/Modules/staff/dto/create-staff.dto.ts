@@ -39,9 +39,9 @@ export class CreateStaffDto {
   @IsNumber()
   salary: number;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Date of birth is required' })
   @Type(() => Date)
-  @IsDate()
+  @IsDate({ message: 'dateOfBirth must be a valid date instance (e.g. YYYY-MM-DD)' })
   dateOfBirth: Date;
 
   @IsNotEmpty()
