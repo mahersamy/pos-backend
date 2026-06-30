@@ -14,7 +14,7 @@ export class Staff {
   @Prop({ type: String, required: true })
   position: string;
 
-  @Prop({ type: String, required: true, maxLength: 15, minLength: 15 })
+  @Prop({ type: String, required: true, maxLength: 11, minLength: 11 })
   phoneNumber: string;
 
   @Prop({ type: String })

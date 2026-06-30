@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { sendConfirmEmail, sendOrderNotification } from '../email/send.email';
+import { sendAnnouncementEmail, sendConfirmEmail, sendOrderNotification } from '../email/send.email';
 
 export const emailEvent = new EventEmitter();
 
@@ -37,3 +37,23 @@ emailEvent.on(
     });
   },
 );
+
+emailEvent.on(
+  'sendAnnouncementNotification',
+  async ({
+    to,
+    subject,
+    message,
+  }: {
+    to: string;
+    subject: string;
+    message: string;
+  }) => {
+    await sendAnnouncementEmail({
+      to,
+      subject,
+      message,
+    });
+  },
+);
+  

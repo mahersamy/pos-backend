@@ -22,7 +22,7 @@ export class DashboardService {
   private async cacheOrSet<T>(
     key: string,
     cb: () => Promise<T>,
-    ttl = 60000,
+    ttl = 60_000, // fallback: 60s
   ): Promise<T> {
     const cached = await this.cacheManager.get<T>(key);
 
@@ -44,9 +44,9 @@ export class DashboardService {
     return freshData;
   }
 
-  private async safeMetric<T>(promise: Promise<T>, fallback: T): Promise<T> {
+  private async safeMetric<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
     try {
-      return await promise;
+      return await fn();
     } catch {
       return fallback;
     }
@@ -73,27 +73,11 @@ export class DashboardService {
       popularDishes,
       lowStockItems,
     ] = await Promise.all([
-      this.safeMetric(this.getDailySales(), 0),
-
-      this.safeMetric(
-        this.getMonthlyRevenue(),
-        0,
-      ),
-
-      this.safeMetric(
-        this.getOverviewCached(),
-        [],
-      ),
-
-      this.safeMetric(
-        this.getPopularDishesCached(),
-        [],
-      ),
-
-      this.safeMetric(
-        this.getLowStockItemsCached(),
-        [],
-      ),
+      this.safeMetric(() => this.getDailySalesCached(), 0),
+      this.safeMetric(() => this.getMonthlyRevenueCached(), 0),
+      this.safeMetric(() => this.getOverviewCached(), []),
+      this.safeMetric(() => this.getPopularDishesCached(), []),
+      this.safeMetric(() => this.getLowStockItemsCached(), []),
     ]);
 
     return {
@@ -196,6 +180,8 @@ export class DashboardService {
 
     result.forEach((item) => {
       const monthIndex = item._id.month - 1;
+      // Only dine_in is broken out separately per product requirement.
+      // All order types contribute to totalRevenue.
       if (item._id.type === 'dine_in') {
         overview[monthIndex].dineInSales += item.total;
       }
@@ -245,8 +231,10 @@ export class DashboardService {
     const result = await this.inventoryRepo.aggregate([
       {
         $match: {
-          stock: InventoryStock.INSTOCK,
-          quantity: { $lt: 50 },
+          $or: [
+            { stock: InventoryStock.INSTOCK, quantity: { $lt: 50 } },
+            { stock: InventoryStock.OUTOFSTOCK },
+          ],
         },
       },
       {
@@ -261,6 +249,22 @@ export class DashboardService {
 
 
   // Cached 
+  private async getDailySalesCached() {
+    return this.cacheOrSet(
+      'dashboard:daily-sales',
+      () => this.getDailySales(),
+      1000 * 30, // 30s — sales data should be relatively fresh
+    );
+  }
+
+  private async getMonthlyRevenueCached() {
+    return this.cacheOrSet(
+      'dashboard:monthly-revenue',
+      () => this.getMonthlyRevenue(),
+      1000 * 60, // 1 min
+    );
+  }
+
   private async getOverviewCached() {
     return this.cacheOrSet(
       'dashboard:overview',

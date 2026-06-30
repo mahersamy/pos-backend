@@ -6,10 +6,9 @@ import {
   IsOptional,
   IsString,
   Length,
-  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsTimeFormat } from '../../../common';
+import { IsTimeFormat, IsMinimumAge } from '../../../common';
 
 export class CreateStaffDto {
   @IsNotEmpty()
@@ -27,7 +26,7 @@ export class CreateStaffDto {
 
   @IsNotEmpty()
   @IsString()
-  @Length(15, 15, { message: 'Phone number must be exactly 15 characters' })
+  @Length(11, 11, { message: 'Phone number must be exactly 11 characters' })
   phoneNumber: string;
 
   @IsOptional()
@@ -42,6 +41,7 @@ export class CreateStaffDto {
   @IsNotEmpty({ message: 'Date of birth is required' })
   @Type(() => Date)
   @IsDate({ message: 'dateOfBirth must be a valid date instance (e.g. YYYY-MM-DD)' })
+  @IsMinimumAge(18)
   dateOfBirth: Date;
 
   @IsNotEmpty()

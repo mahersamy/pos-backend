@@ -29,7 +29,7 @@ export class NotificationService {
     metadata?: Record<string, any>,
   ) {
     const user = await this.userRepository.findById(userId);
-    if (!user) return;
+    if (!user) throw new NotFoundException(`User not found`);
 
     const recipient = metadata?.recipient || user.email;
 
@@ -44,19 +44,29 @@ export class NotificationService {
       metadata,
     });
 
-    if (type === NotificationType.ORDER_PLACED) {
-      emailEvent.emit('sendOrderPlacedNotification', {
-        to: recipient,
-        subject: title,
-        customerName: metadata?.customerName || user.fullName || user.firstName,
-        orderId: String(metadata?.orderId || ''),
-        totalAmount: metadata?.totalAmount || 0,
-        items: metadata?.items || [],
-      });
+    switch (type) {
+      case NotificationType.ORDER_PLACED:
+        emailEvent.emit('sendOrderPlacedNotification', {
+          to: recipient,
+          subject: title,
+          customerName: metadata?.customerName || user.fullName || user.firstName,
+          orderId: String(metadata?.orderId || ''),
+          totalAmount: metadata?.totalAmount || 0,
+          items: metadata?.items || [],
+        });
+        break;
+      case NotificationType.ANNOUNCEMENT:
+        emailEvent.emit('sendAnnouncementNotification', {
+          to: recipient,
+          subject: title,
+          message: messageBody,
+        });
+        break;
     }
 
     return notification;
   }
+
   private async sendPushNotification(
     userId: Types.ObjectId,
     type: NotificationType,
@@ -193,7 +203,7 @@ export class NotificationService {
 
     switch (channel) {
       case NotificationChannel.EMAIL:
-        this.sendEmailNotification(actualReceiverId, type, title, messageBody, NotificationStatus.PENDING, metadata);
+        this.sendEmailNotification(actualReceiverId, type, title, messageBody, NotificationStatus.SENT, metadata);
         break;
       case NotificationChannel.PUSH:
         this.sendPushNotification(actualReceiverId, type, title, messageBody, NotificationStatus.PENDING, metadata);

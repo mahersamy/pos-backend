@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import { verifyEmailTemplate } from "./templates/verify.email.template";
 import { orderPlacedTemplate } from "./templates/notification.templates";
 import { lowStockEmailTemplate } from "./templates/low-stock.template";
+import { announcementEmailTemplate } from "./templates/annoucment.tempelate";
 
 export async function sendConfirmEmail(
   to: string,
@@ -110,4 +111,41 @@ export async function sendLowStockEmail(
     console.error("❌ Error sending low stock email:", error);
     return false;
   }
+}
+
+export async function sendAnnouncementEmail({
+  to,
+  subject,
+  message,
+}: {
+  to: string;
+  subject: string;
+  message: string;
+}) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+   const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: Array.isArray(to) ? to.join(", ") : to,
+    subject: subject,
+    html: announcementEmailTemplate(message, subject),
+  };
+
+   try {
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Low stock email sent to: ${mailOptions.to}`);
+    return true;
+  } catch (error) {
+    console.error("❌ Error sending low stock email:", error);
+    return false;
+  }
+
 }
