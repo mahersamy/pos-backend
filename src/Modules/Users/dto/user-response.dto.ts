@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
-import { Action, Resource, Role } from 'src/common';
+import { Role } from 'src/common';
+import type { PermissionsMap } from '../../../DB/Models/users.model';
 
 export class UserProfileResponseDto {
   @Expose()
@@ -15,5 +16,5 @@ export class UserProfileResponseDto {
   role: Role;
 
   @Expose()
-  permissions: { resource: Resource; actions: Action[] }[];
+  permissions: PermissionsMap;
 }

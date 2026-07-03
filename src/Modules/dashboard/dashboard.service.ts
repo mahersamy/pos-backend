@@ -1,105 +1,36 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OrderRepository } from '../../DB/Repository/order.repository';
 import { InventoryRepository } from '../../DB/Repository/inventory.repository';
 import { InventoryStock } from '../../common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import type { Cache } from 'cache-manager';
+import { DashboardHelpers } from './dashboard.helpers';
+import {
+  MonthlyOverviewItem,
+  PopularDishItem,
+  LowStockItem,
+} from './dto/dashboard-metrics.dto';
 
-
-
+const MONTHS = [
+  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+  'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+];
 
 @Injectable()
 export class DashboardService {
   constructor(
     private readonly orderRepo: OrderRepository,
     private readonly inventoryRepo: InventoryRepository,
+    private readonly helpers: DashboardHelpers,
+  ) {}
 
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache,
-  ) { }
-
-  // Cached Helper
-  private async cacheOrSet<T>(
-    key: string,
-    cb: () => Promise<T>,
-    ttl = 60_000, // fallback: 60s
-  ): Promise<T> {
-    const cached = await this.cacheManager.get<T>(key);
-
-    if (cached !== undefined) {
-      console.log('CACHE HIT:', key);
-      return cached;
-    }
-
-    console.log('CACHE MISS → FETCHING:', key);
-
-    const freshData = await cb();
-
-    await this.cacheManager.set(
-      key,
-      freshData,
-      ttl,
-    );
-
-    return freshData;
-  }
-
-  private async safeMetric<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
-    try {
-      return await fn();
-    } catch {
-      return fallback;
-    }
-  }
-
-  private buildNonCancelledDateMatch(start: Date, end: Date) {
-    return {
-      createdAt: {
-        $gte: start,
-        $lte: end,
-      },
-      status: {
-        $ne: 'cancelled',
-      },
-    };
-  }
-
-  // Get Dashboard Metrics
-  async getDashboardMetrics() {
-    const [
-      dailySales,
-      monthlyRevenue,
-      overview,
-      popularDishes,
-      lowStockItems,
-    ] = await Promise.all([
-      this.safeMetric(() => this.getDailySalesCached(), 0),
-      this.safeMetric(() => this.getMonthlyRevenueCached(), 0),
-      this.safeMetric(() => this.getOverviewCached(), []),
-      this.safeMetric(() => this.getPopularDishesCached(), []),
-      this.safeMetric(() => this.getLowStockItemsCached(), []),
-    ]);
-
-    return {
-      dailySales,
-      monthlyRevenue,
-      overview,
-      popularDishes,
-      lowStockItems,
-    };
-  }
+  // ─── Raw Queries ─────────────────────────────────────────────────────────────
 
   private async getRevenueBetweenDates(start: Date, end: Date): Promise<number> {
     const result = await this.orderRepo.aggregate([
-      {
-        $match: this.buildNonCancelledDateMatch(start, end),
-      },
+      { $match: this.helpers.buildNonCancelledDateMatch(start, end) },
       {
         $group: {
           _id: null,
-          total: {
-            $sum: '$totalAmount',
-          },
+          total: { $sum: '$totalAmount' },
         },
       },
     ]);
@@ -107,7 +38,7 @@ export class DashboardService {
     return result.length > 0 ? result[0].total : 0;
   }
 
-  private async getDailySales() {
+  private async getDailySales(): Promise<number> {
     const now = new Date();
 
     const startOfDay = new Date(now);
@@ -119,34 +50,28 @@ export class DashboardService {
     return this.getRevenueBetweenDates(startOfDay, endOfDay);
   }
 
-  private async getMonthlyRevenue() {
+  private async getMonthlyRevenue(): Promise<number> {
     const now = new Date();
 
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
     const endOfMonth = new Date(
       now.getFullYear(),
       now.getMonth() + 1,
       0,
-      23,
-      59,
-      59,
-      999,
+      23, 59, 59, 999,
     );
 
     return this.getRevenueBetweenDates(startOfMonth, endOfMonth);
   }
 
-  private async getOverview() {
+  private async getOverview(): Promise<MonthlyOverviewItem[]> {
     const now = new Date();
     const currentYear = now.getFullYear();
     const startOfYear = new Date(currentYear, 0, 1);
     const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59, 999);
 
     const result = await this.orderRepo.aggregate([
-      {
-        $match: this.buildNonCancelledDateMatch(startOfYear, endOfYear),
-      },
+      { $match: this.helpers.buildNonCancelledDateMatch(startOfYear, endOfYear) },
       {
         $group: {
           _id: {
@@ -158,21 +83,7 @@ export class DashboardService {
       },
     ]);
 
-    const months = [
-      'JAN',
-      'FEB',
-      'MAR',
-      'APR',
-      'MAY',
-      'JUN',
-      'JUL',
-      'AUG',
-      'SEP',
-      'OCT',
-      'NOV',
-      'DEC',
-    ];
-    const overview = months.map((month) => ({
+    const overview: MonthlyOverviewItem[] = MONTHS.map((month) => ({
       name: month,
       dineInSales: 0,
       totalRevenue: 0,
@@ -191,8 +102,8 @@ export class DashboardService {
     return overview;
   }
 
-  private async getPopularDishes() {
-    const result = await this.orderRepo.aggregate([
+  private async getPopularDishes(): Promise<PopularDishItem[]> {
+    return this.orderRepo.aggregate([
       { $match: { status: { $ne: 'cancelled' } } },
       { $unwind: '$orderItems' },
       {
@@ -205,7 +116,7 @@ export class DashboardService {
       { $limit: 6 },
       {
         $lookup: {
-          from: 'inventories', // Usually pluralized collection name
+          from: 'inventories',
           localField: '_id',
           foreignField: '_id',
           as: 'inventoryDetails',
@@ -223,12 +134,10 @@ export class DashboardService {
         },
       },
     ]);
-
-    return result;
   }
 
-  private async getLowStockItems() {
-    const result = await this.inventoryRepo.aggregate([
+  private async getLowStockItems(): Promise<LowStockItem[]> {
+    return this.inventoryRepo.aggregate([
       {
         $match: {
           $or: [
@@ -237,55 +146,51 @@ export class DashboardService {
           ],
         },
       },
-      {
-        $sort: { quantity: 1 },
-      },
-      {
-        $limit: 10,
-      },
+      { $sort: { quantity: 1 } },
+      { $limit: 10 },
     ]);
-    return result;
   }
 
+  // ─── Cached Public Methods (called by controller endpoints) ─────────────────
 
-  // Cached 
-  private async getDailySalesCached() {
-    return this.cacheOrSet(
+  async getDailySalesCached(): Promise<number> {
+    return this.helpers.cacheOrSet(
       'dashboard:daily-sales',
       () => this.getDailySales(),
-      1000 * 30, // 30s — sales data should be relatively fresh
+      1000 * 30, // 30s
     );
   }
 
-  private async getMonthlyRevenueCached() {
-    return this.cacheOrSet(
+  async getMonthlyRevenueCached(): Promise<number> {
+    return this.helpers.cacheOrSet(
       'dashboard:monthly-revenue',
       () => this.getMonthlyRevenue(),
       1000 * 60, // 1 min
     );
   }
 
-  private async getOverviewCached() {
-    return this.cacheOrSet(
+  async getOverviewCached(): Promise<MonthlyOverviewItem[]> {
+    return this.helpers.cacheOrSet(
       'dashboard:overview',
       () => this.getOverview(),
-      1000 * 60,
+      1000 * 60, // 1 min
     );
   }
 
-  private async getPopularDishesCached() {
-    return this.cacheOrSet(
+  async getPopularDishesCached(): Promise<PopularDishItem[]> {
+    return this.helpers.cacheOrSet(
       'dashboard:popular-dishes',
       () => this.getPopularDishes(),
-      1000 * 60 * 5,
+      1000 * 60 * 5, // 5 min
     );
   }
 
-  private async getLowStockItemsCached() {
-    return this.cacheOrSet(
+  async getLowStockItemsCached(): Promise<LowStockItem[]> {
+    return this.helpers.cacheOrSet(
       'dashboard:low-stock',
       () => this.getLowStockItems(),
-      1000 * 60 * 2,
+      1000 * 60 * 2, // 2 min
     );
   }
+
 }

@@ -7,6 +7,9 @@ import { Resource } from '../../common/Enums/resource-permisson.enum';
 
 export type UserDocument = HydratedDocument<User>;
 
+/** Map of resource → action → boolean, e.g. { staff: { read: true, write: false, delete: false } } */
+export type PermissionsMap = Partial<Record<Resource, Record<Action, boolean>>>;
+
 @Schema({ timestamps: true, virtuals: true, toJSON: { virtuals: true } })
 export class User {
   @Prop({ required: true, trim: true, lowercase: true })
@@ -24,18 +27,8 @@ export class User {
   @Prop({ type: String, enum: Role, default: Role.USER, required: true })
   role: Role;
 
-  @Prop({
-    _id: false,
-    type: [
-      {
-        _id: false,
-        resource: { type: String, enum: Resource, required: true },
-        actions: [{ type: String, enum: Action }],
-      },
-    ],
-    default: [],
-  })
-  permissions: { resource: Resource; actions: Action[] }[];
+  @Prop({ type: Object, default: {} })
+  permissions: PermissionsMap;
 
   @Prop({ type: Number, min: [14, 'Age must be at least 14'], required: true })
   age: number;

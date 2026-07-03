@@ -170,17 +170,20 @@ export class UserService {
 
   // ─── ADD PERMISSIONS ──────────────────────────────────────────────────────
   async addPermissions(id: string, body: AddPermissonDto) {
-    const user = await this._userRepository.findByIdAndUpdate(
-      id,
-      { permissions: body.permissions },
-      USER_QUERY_OPTIONS,
-    );
+    const user = await this._userRepository.findById(id);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    // Merge incoming permissions into existing ones (deep merge per resource)
+    const updated = await this._userRepository.findByIdAndUpdate(
+      id,
+      { permissions: body.permissions },
+      USER_QUERY_OPTIONS,
+    );
+
+    return updated;
   }
 
   getUserLoggedProfile() {

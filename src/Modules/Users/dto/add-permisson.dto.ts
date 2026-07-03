@@ -1,19 +1,32 @@
-import { IsArray, IsEnum, ValidateNested } from 'class-validator';
+import {
+  IsBoolean,
+  IsObject,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { Resource, Action } from '../../../common/Enums';
+import { Resource } from '../../../common/Enums';
 
-class PermissionItemDto {
-  @IsEnum(Resource)
-  resource: Resource;
+/** Boolean flags for a single resource */
+export class ActionPermissionsDto {
+  @IsOptional()
+  @IsBoolean()
+  read?: boolean;
 
-  @IsArray()
-  @IsEnum(Action, { each: true })
-  actions: Action[];
+  @IsOptional()
+  @IsBoolean()
+  write?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  delete?: boolean;
 }
 
-export class AddPermissonDto {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => PermissionItemDto)
-  permissions: PermissionItemDto[];
+/** Full permissions map sent in the request body */
+export class UpdatePermissionsDto {
+  @IsObject()
+  permissions: Partial<Record<Resource, ActionPermissionsDto>>;
 }
+
+// Keep old name as alias so existing imports don't break
+export { UpdatePermissionsDto as AddPermissonDto };

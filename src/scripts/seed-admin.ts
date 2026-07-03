@@ -34,7 +34,7 @@ async function seedAdmin() {
         age: 30,
         phoneNumber: process.env.ADMIN_PHONE,
         isActive: true,
-        permissions: [],       // ← new field in your model, default []
+        permissions: {},       // ← flat boolean map, default empty
         fcmTokens: [],       // ← new field in your model, default []
     });
 
