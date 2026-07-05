@@ -24,6 +24,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { AddPermissonDto } from './dto/add-permisson.dto';
 import { GetAllUserDto } from './dto/get-all-user.dto';
+import { ChangeRoleDto } from './dto/change-role.dto';
 
 @AuthApply({ tokenType: tokenTypeEnum.Access, roles: [Role.ADMIN] })
 @Controller('users')
@@ -38,7 +39,6 @@ export class UserController {
       firstName,
       lastName,
       email,
-      phoneNumber,
       role,
       permissions,
       profilePicture,
@@ -50,7 +50,6 @@ export class UserController {
       firstName,
       lastName,
       email,
-      phoneNumber,
       role,
       permissions,
       profilePicture,
@@ -109,7 +108,13 @@ export class UserController {
     return this._userService.remove(id);
   }
 
-  // ─── PERMISSIONS ──────────────────────────────────────────────────────────
+  // ─── CHANGE ROLE ──────────────────────────────────────────────────────────
+  @Patch(':id/role')
+  changeRole(@Param() { id }: ParamIdDto, @Body() dto: ChangeRoleDto) {
+    return this._userService.changeRole(id, dto);
+  }
+
+  // ─── PERMISSIONS ────────────────────────────────────────────────────────────
   @Patch(':id/permissions')
   updatePermissions(
     @Param() { id }: ParamIdDto,

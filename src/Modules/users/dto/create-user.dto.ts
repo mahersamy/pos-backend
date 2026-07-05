@@ -37,10 +37,6 @@ export class CreateUserDto {
   //   confirmPassword: string;
 
   @IsString()
-  @IsNotEmpty()
-  phoneNumber: string;
-
-  @IsString()
   @IsOptional()
   address: string;
 

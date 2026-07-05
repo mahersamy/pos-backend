@@ -23,4 +23,4 @@ import { UserController } from './user.controller';
     CloudinaryService,
   ],
 })
-export class UserModule {}
+export class UserModule { }

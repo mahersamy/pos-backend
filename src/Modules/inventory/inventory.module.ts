@@ -6,7 +6,7 @@ import { InventoryRepository } from "../../DB/Repository/inventory.repository";
 import { Inventory, InventorySchema } from "../../DB/Models/inventory.model";
 import { CloudinaryService } from "../../common/services/cloudinary/cloudinary.service";
 import { CategoryModule } from "../category/category.module";
-import { UserModule } from "../Users/user.module";
+import { UserModule } from "../users/user.module";
 
 @Module({
   imports: [

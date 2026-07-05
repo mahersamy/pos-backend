@@ -8,3 +8,4 @@ export * from './resource-permisson.enum';
 export * from './inventory-stock.enum';
 export * from './inventory-status.enum';
 export * from './order-type.enum';
+export * from './user-status.enum';

@@ -4,6 +4,7 @@ import { Role } from '../../common/Enums/role.enum';
 import { OtpDocument } from './otp.model';
 import { Action } from '../../common/Enums/actions-permisson.enum';
 import { Resource } from '../../common/Enums/resource-permisson.enum';
+import { UserStatus } from '../../common/Enums/user-status.enum';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -33,17 +34,14 @@ export class User {
   @Prop({ type: Number, min: [14, 'Age must be at least 14'], required: true })
   age: number;
 
-  @Prop({ type: String, required: true })
-  phoneNumber: string;
-
   @Prop({ type: String })
   address: string;
 
   @Prop({ type: String })
   profilePicture: string;
 
-  @Prop({ type: Boolean })
-  isActive: boolean;
+  @Prop({ type: String, enum: UserStatus, default: UserStatus.ACTIVE })
+  active: UserStatus;
 
   @Virtual()
   otp: OtpDocument[];

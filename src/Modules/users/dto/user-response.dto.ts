@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { Role } from 'src/common';
+import { Role, UserStatus } from 'src/common';
 import type { PermissionsMap } from '../../../DB/Models/users.model';
 
 export class UserProfileResponseDto {
@@ -17,4 +17,7 @@ export class UserProfileResponseDto {
 
   @Expose()
   permissions: PermissionsMap;
+
+  @Expose()
+  active: UserStatus;
 }

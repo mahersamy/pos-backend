@@ -12,7 +12,6 @@ import {
 import {
   HashService,
   ROLE_DEFAULT_PERMISSIONS,
-  EncryptionService,
 } from '../../common';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,13 +19,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { AddPermissonDto } from './dto/add-permisson.dto';
 import { GetAllUserDto } from './dto/get-all-user.dto';
+import { ChangeRoleDto } from './dto/change-role.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly _userRepository: UserRepository,
     private readonly _hashService: HashService,
-    private readonly _encryptionService: EncryptionService,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
@@ -41,14 +40,10 @@ export class UserService {
 
     const defaultPermissions = ROLE_DEFAULT_PERMISSIONS[user.role] ?? [];
     const hashedPassword = await this._hashService.hash(user.password);
-    const encryptedPhoneNumber = await this._encryptionService.encrypt(
-      user.phoneNumber,
-    );
 
     const newUser = await this._userRepository.createAndReturn({
       ...user,
       password: hashedPassword,
-      phoneNumber: encryptedPhoneNumber,
       permissions: defaultPermissions,
     });
 
@@ -109,13 +104,12 @@ export class UserService {
       }
     }
 
-    if (dto.phoneNumber) {
-      dto.phoneNumber = await this._encryptionService.encrypt(dto.phoneNumber);
-    }
+    const updateData = { ...dto };
+
 
     const updated = await this._userRepository.findByIdAndUpdate(
       id,
-      dto,
+      updateData,
       USER_QUERY_OPTIONS,
     );
 
@@ -168,6 +162,22 @@ export class UserService {
     return 'User deleted successfully';
   }
 
+  // ─── CHANGE ROLE ──────────────────────────────────────────────────────────
+  async changeRole(id: string, dto: ChangeRoleDto) {
+    const user = await this._userRepository.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+
+    const defaultPermissions = ROLE_DEFAULT_PERMISSIONS[dto.role] ?? {};
+
+    const updated = await this._userRepository.findByIdAndUpdate(
+      id,
+      { role: dto.role, permissions: defaultPermissions },
+      USER_QUERY_OPTIONS,
+    );
+
+    return updated;
+  }
+
   // ─── ADD PERMISSIONS ──────────────────────────────────────────────────────
   async addPermissions(id: string, body: AddPermissonDto) {
     const user = await this._userRepository.findById(id);
@@ -187,6 +197,6 @@ export class UserService {
   }
 
   getUserLoggedProfile() {
-  
+
   }
 }

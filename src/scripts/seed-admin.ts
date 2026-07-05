@@ -32,10 +32,8 @@ async function seedAdmin() {
         password,
         role: 'ADMIN',
         age: 30,
-        phoneNumber: process.env.ADMIN_PHONE,
-        isActive: true,
+        active: 'active',
         permissions: {},       // ← flat boolean map, default empty
-        fcmTokens: [],       // ← new field in your model, default []
     });
 
     console.log('✅ Admin created:', process.env.ADMIN_EMAIL);
