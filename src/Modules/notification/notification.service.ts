@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { NOTIFICATION_QUERY_OPTIONS, NotificationRepository } from '../../DB/Repository/notification.repository';
 import { UserRepository } from '../../DB/Repository/user.repository';
 import { FirebaseService } from '../../common/services/firebase/firebase.service';
+import { FcmTokenRepository } from '../../DB/Repository/fcm-token.repository';
 import {
   NotificationType,
   NotificationChannel,
@@ -18,6 +19,7 @@ export class NotificationService {
     private readonly notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
     private readonly firebaseService: FirebaseService,
+    private readonly fcmTokenRepository: FcmTokenRepository,
   ) { }
 
   private async sendEmailNotification(
@@ -88,14 +90,32 @@ export class NotificationService {
       metadata,
     });
 
-    if (user.fcmTokens && user.fcmTokens.length > 0) {
+    const objectIdUserId = new Types.ObjectId(userId.toString());
+    const userTokensDocs = await this.fcmTokenRepository.find({ userId: objectIdUserId });
+    const fcmTokens = userTokensDocs.map(doc => doc.token);
+
+    if (fcmTokens.length > 0) {
       try {
-        await this.firebaseService.sendPushNotification(
-          user.fcmTokens,
+        const response = await this.firebaseService.sendPushNotification(
+          fcmTokens,
           title,
           messageBody,
           metadata as { [key: string]: string },
         );
+
+        if (response && response.failureCount > 0) {
+          const failedTokens: string[] = [];
+          response.responses.forEach((resp, idx) => {
+            if (!resp.success && (resp.error?.code === 'messaging/registration-token-not-registered' || resp.error?.message === 'NotRegistered' || resp.error?.code === 'messaging/invalid-registration-token')) {
+              failedTokens.push(fcmTokens[idx]);
+            }
+          });
+
+          if (failedTokens.length > 0) {
+            await this.fcmTokenRepository.deleteMany({ token: { $in: failedTokens } });
+          }
+        }
+
         notification.status = NotificationStatus.SENT;
         notification.sentAt = new Date();
       } catch (error) {
@@ -176,11 +196,11 @@ export class NotificationService {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    if (!user.fcmTokens) user.fcmTokens = [];
-    if (!user.fcmTokens.includes(token)) {
-      user.fcmTokens.push(token);
-      await user.save();
-    }
+    await this.fcmTokenRepository.findOneAndUpdate(
+      { token },
+      { $set: { userId } },
+      { upsert: true, new: true }
+    );
     return { message: 'Token added successfully' };
   }
 

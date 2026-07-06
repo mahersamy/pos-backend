@@ -53,8 +53,6 @@ export class User {
   })
   fullName: string;
 
-  @Prop({ type: [String], default: [] })
-  fcmTokens: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
