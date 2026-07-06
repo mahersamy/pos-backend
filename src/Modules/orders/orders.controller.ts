@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -21,6 +22,8 @@ import {
 } from 'src/common';
 import type { UserDocument } from '../../DB/Models/users.model';
 
+@ApiTags('Orders')
+@ApiBearerAuth('access-token')
 @AuthApply({ roles: [] })
 @Controller('orders')
 export class OrdersController {

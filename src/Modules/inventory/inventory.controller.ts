@@ -9,6 +9,7 @@ import {
   Query,
   UploadedFile,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
@@ -25,6 +26,8 @@ import {
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
 import type { UserDocument } from '../../DB/Models/users.model';
 
+@ApiTags('Inventory')
+@ApiBearerAuth('access-token')
 @AuthApply({ roles: [] })
 @Controller('inventory')
 export class InventoryController {

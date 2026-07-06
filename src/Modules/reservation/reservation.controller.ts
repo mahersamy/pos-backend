@@ -8,6 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -22,6 +23,8 @@ import {
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
 import type { UserDocument } from '../../DB/Models/users.model';
 
+@ApiTags('Reservations')
+@ApiBearerAuth('access-token')
 @AuthApply({ roles: [] })
 @Controller('reservations')
 export class ReservationController {

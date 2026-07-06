@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { StaffService } from './staff.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
@@ -26,6 +27,8 @@ import type { UserDocument } from '../../DB/Models/users.model';
 import { GetAllStaffDto } from './dto/get-all-staff.dto';
 import { DeleteManyStaffDto } from './dto/delete-many-staff.dto';
 
+@ApiTags('Staff')
+@ApiBearerAuth('access-token')
 @AuthApply({ roles: [Role.ADMIN, Role.MANAGER] })
 @Controller('staff')
 export class StaffController {

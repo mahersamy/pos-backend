@@ -8,6 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import {
   AuthUser,
@@ -26,6 +27,8 @@ import { AddPermissonDto } from './dto/add-permisson.dto';
 import { GetAllUserDto } from './dto/get-all-user.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
 
+@ApiTags('Users')
+@ApiBearerAuth('access-token')
 @AuthApply({ tokenType: tokenTypeEnum.Access, roles: [Role.ADMIN] })
 @Controller('users')
 export class UserController {

@@ -23,11 +23,11 @@ export class GetAllStaffDto extends GetAllDto {
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
-    startSalary: number;
+    startSalary?: number;
 
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
     @Validate(IsGreaterThanStartSalaryConstraint)
-    endSalary: number;
+    endSalary?: number;
 }

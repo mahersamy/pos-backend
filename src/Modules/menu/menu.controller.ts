@@ -8,6 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MenuService } from './menu.service';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
@@ -23,6 +24,8 @@ import {
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
 import type { UserDocument } from '../../DB/Models/users.model';
 
+@ApiTags('Menus')
+@ApiBearerAuth('access-token')
 @AuthApply({ roles: [] })
 @Controller('menus')
 export class MenuController {

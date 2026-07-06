@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Req, Get, Query, Patch, Delete, Param } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { NotificationService } from './notification.service';
 import { AuthApply, AuthUser, ParamIdDto } from '../../common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -10,6 +11,8 @@ import { MarkAsReadNotificationDto } from './dto/update-notification.dto';
 
 
 
+@ApiTags('Notifications')
+@ApiBearerAuth('access-token')
 @AuthApply({ roles: [] })
 @Controller('notification')
 export class NotificationController {

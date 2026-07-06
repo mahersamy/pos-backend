@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthApply, CheckPermissions, Action, Resource } from '../../common';
 import { DashboardService } from './dashboard.service';
 import { DashboardHelpers } from './dashboard.helpers';
@@ -8,6 +9,8 @@ import {
   LowStockItem,
 } from './dto/dashboard-metrics.dto';
 
+@ApiTags('Dashboard')
+@ApiBearerAuth('access-token')
 @AuthApply({ roles: [] })
 @Controller('dashboard')
 export class DashboardController {

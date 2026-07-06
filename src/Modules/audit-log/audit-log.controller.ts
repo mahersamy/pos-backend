@@ -1,4 +1,5 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { AuditLogService } from "./audit-log.service";
 import { GetAllAuditLogDto } from "./dto/get-all-audit-log.dto";
 import {
@@ -10,6 +11,8 @@ import {
 } from "../../common";
 import { AuthApply } from "../../common/Decorators/authApply.decorator";
 
+@ApiTags('Audit Logs')
+@ApiBearerAuth('access-token')
 @AuthApply({ roles: [Role.ADMIN, Role.MANAGER] })
 @Controller("audit-logs")
 export class AuditLogController {

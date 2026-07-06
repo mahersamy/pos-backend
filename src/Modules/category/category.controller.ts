@@ -8,6 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -25,6 +26,8 @@ import {
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
 import type { UserDocument } from '../../DB/Models/users.model';
 
+@ApiTags('Categories')
+@ApiBearerAuth('access-token')
 @AuthApply({ roles: [Role.ADMIN, Role.MANAGER] })
 @Controller('categories')
 export class CategoryController {
