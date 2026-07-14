@@ -9,7 +9,6 @@ import {
   UnifiedResponseInterceptor,
   AuditLogInterceptor,
 } from "./common";
-import { MongooseModule } from "@nestjs/mongoose";
 import { GlobalModule } from "./Modules/global.module";
 import {
   AuthModule,
@@ -22,12 +21,12 @@ import {
   NotificationModule,
   MenuModule,
 } from "./Modules/feature.modules";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-
+import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CacheModule } from "@nestjs/cache-manager";
-import KeyvRedis, { Keyv } from "@keyv/redis";
+import { DatabaseModule } from "./common/database/database.module";
+import { AppCacheModule } from "./common/cache/cache.module";
+// import { validate } from "./common/Config/env.validation";
 
 @Module({
   imports: [
@@ -48,47 +47,14 @@ import KeyvRedis, { Keyv } from "@keyv/redis";
     ConfigModule.forRoot({
       isGlobal: true, // makes it available app-wide (no need to import in every module)
       envFilePath: ".env", // default, can specify other paths
-    }),
-
-    // Cache
-    CacheModule.registerAsync({
-      isGlobal: true,
-
-      inject: [ConfigService],
-
-      useFactory: async (
-        configService: ConfigService,
-      ) => ({
-        stores: [
-          new Keyv({
-            store: new KeyvRedis({
-              username: configService.get<string>(
-                'REDIS_USERNAME',
-              ),
-
-              password: configService.get<string>(
-                'REDIS_PASSWORD',
-              ),
-
-              socket: {
-                host: configService.get<string>(
-                  'REDIS_HOST',
-                ),
-
-                port: Number(
-                  configService.get<string>(
-                    'REDIS_PORT',
-                  ),
-                ),
-              },
-            }),
-          }),
-        ],
-      }),
+      // validate: validate,
     }),
 
     // Database
-    MongooseModule.forRoot(process.env.DATABASE_URI as string),
+    DatabaseModule,
+
+    // Cache
+    AppCacheModule,
   ],
   controllers: [AppController],
   providers: [
@@ -103,17 +69,17 @@ import KeyvRedis, { Keyv } from "@keyv/redis";
       provide: APP_INTERCEPTOR,
       useClass: TimeoutInterceptor,
     },
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: AuditLogInterceptor,
-    // },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditLogInterceptor,
+    },
 
     // Cloudinary
     CloudinaryProvider,
   ],
 })
 export class AppModule {
-  // logger middelware
+  // logger middleware
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes("*");
   }

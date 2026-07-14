@@ -4,9 +4,10 @@ import { DashboardService } from './dashboard.service';
 import { DashboardHelpers } from './dashboard.helpers';
 import { OrdersModule } from '../orders/orders.module';
 import { InventoryModule } from '../inventory/inventory.module';
+import { AppCacheModule } from 'src/common/cache/cache.module';
 
 @Module({
-  imports: [OrdersModule, InventoryModule],
+  imports: [OrdersModule, InventoryModule ,AppCacheModule],
   controllers: [DashboardController],
   providers: [DashboardHelpers, DashboardService],
 })

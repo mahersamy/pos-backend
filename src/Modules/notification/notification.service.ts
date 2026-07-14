@@ -1,14 +1,15 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { NOTIFICATION_QUERY_OPTIONS, NotificationRepository } from '../../DB/Repository/notification.repository';
-import { UserRepository } from '../../DB/Repository/user.repository';
+import { NotificationRepository } from './repository/notification.repository';
+import { NOTIFICATION_QUERY_OPTIONS } from './constants/notification.constants';
+import { UserRepository } from '../users/repository/user.repository';
 import { FirebaseService } from '../../common/services/firebase/firebase.service';
-import { FcmTokenRepository } from '../../DB/Repository/fcm-token.repository';
+import { FcmTokenRepository } from '../users/repository/fcm-token.repository';
 import {
   NotificationType,
   NotificationChannel,
   NotificationStatus,
   NotificationDocument,
-} from '../../DB/Models/notification.model';
+} from './model/notification.model';
 import { QueryFilter, Types } from 'mongoose';
 import { GetNotificationsDto } from './dto/get-all-notification.dto';
 import { emailEvent } from '../../common/utils/email/email.event';

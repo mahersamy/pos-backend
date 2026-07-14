@@ -4,14 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { isValidObjectId } from 'mongoose';
-import {
-  MenuRepository,
-  MENU_QUERY_OPTIONS,
-} from '../../DB/Repository/menu.repository';
+import { MenuRepository } from './repository/menu.repository';
+import { MENU_QUERY_OPTIONS } from './constants/menu.constants';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { GetAllMenuDto } from './dto/get-all-menu.dto';
-import type { UserDocument } from '../../DB/Models/users.model';
+import type { UserDocument } from '../users/models/users.model';
 
 @Injectable()
 export class MenuService {

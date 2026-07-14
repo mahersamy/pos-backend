@@ -2,14 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { GetAllOrderDto } from './dto/get-all-order.dto';
-import { InventoryRepository } from '../../DB/Repository/inventory.repository';
-import { InventoryDocument } from '../../DB/Models/inventory.model';
-import { UserDocument } from '../../DB/Models/users.model';
-import {
-  OrderRepository,
-  ORDER_QUERY_OPTIONS,
-} from '../../DB/Repository/order.repository';
-import { OrderItem } from '../../DB/Models/orders.model';
+import { InventoryRepository } from '../inventory/repository/inventory.repository';
+import { InventoryDocument } from '../inventory/model/inventory.model';
+import { UserDocument } from '../users/models/users.model';
+import { OrderRepository } from './repository/order.repository';
+import { ORDER_QUERY_OPTIONS } from './constants/orders.constants';
+import { OrderItem } from './model/orders.model';
 import { OrderStatus, InventoryStock } from '../../common';
 
 @Injectable()

@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Action, Resource, Role } from '../../Enums';
 import { PERMISSION_KEY } from '../../Decorators';
-import type { PermissionsMap } from '../../../DB/Models/users.model';
+import type { PermissionsMap } from '../../../Modules/users/models/users.model';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {

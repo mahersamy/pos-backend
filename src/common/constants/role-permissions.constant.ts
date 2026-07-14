@@ -1,5 +1,5 @@
 import { Action, Resource, Role } from '../Enums';
-import type { PermissionsMap } from '../../DB/Models/users.model';
+import type { PermissionsMap } from '../../Modules/users/models/users.model';
 
 export const ROLE_DEFAULT_PERMISSIONS: Record<Role, PermissionsMap> = {
   [Role.ADMIN]: {},

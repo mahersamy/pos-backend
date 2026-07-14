@@ -1,6 +1,7 @@
 import { Expose } from 'class-transformer';
-import { Role, UserStatus } from 'src/common';
-import type { PermissionsMap } from '../../../DB/Models/users.model';
+import type { PermissionsMap } from '../models/users.model';
+import { Role } from '../../../common/Enums/role.enum';
+import { UserStatus } from '../enums/user-status.enum';
 
 export class UserProfileResponseDto {
   @Expose()

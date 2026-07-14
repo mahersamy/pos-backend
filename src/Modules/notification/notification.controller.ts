@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { NotificationService } from './notification.service';
 import { AuthApply, AuthUser, ParamIdDto } from '../../common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import type { UserDocument } from '../../DB/Models/users.model';
+import type { UserDocument } from '../users/models/users.model';
 import { GetNotificationsDto } from './dto/get-all-notification.dto';
 import { Types } from 'mongoose';
 import { MarkAsReadNotificationDto } from './dto/update-notification.dto';

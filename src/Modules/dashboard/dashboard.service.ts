@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { OrderRepository } from '../../DB/Repository/order.repository';
-import { InventoryRepository } from '../../DB/Repository/inventory.repository';
+import { OrderRepository } from '../orders/repository/order.repository';
+import { InventoryRepository } from '../inventory/repository/inventory.repository';
 import { InventoryStock } from '../../common';
 import { DashboardHelpers } from './dashboard.helpers';
 import {
@@ -8,25 +8,25 @@ import {
   PopularDishItem,
   LowStockItem,
 } from './dto/dashboard-metrics.dto';
+import { CacheHelperService } from 'src/common/cache/cache.service';
+import { CACHE_KEYS, CACHE_TTL, MONTHS } from './dashboard.constants';
 
-const MONTHS = [
-  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-  'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
-];
+
 
 @Injectable()
 export class DashboardService {
   constructor(
     private readonly orderRepo: OrderRepository,
     private readonly inventoryRepo: InventoryRepository,
-    private readonly helpers: DashboardHelpers,
+    private readonly cacheHelperService: CacheHelperService,
+    private readonly dashHelpers: DashboardHelpers,
   ) {}
 
   // ─── Raw Queries ─────────────────────────────────────────────────────────────
 
   private async getRevenueBetweenDates(start: Date, end: Date): Promise<number> {
     const result = await this.orderRepo.aggregate([
-      { $match: this.helpers.buildNonCancelledDateMatch(start, end) },
+      { $match: this.dashHelpers.buildNonCancelledDateMatch(start, end) },
       {
         $group: {
           _id: null,
@@ -71,7 +71,7 @@ export class DashboardService {
     const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59, 999);
 
     const result = await this.orderRepo.aggregate([
-      { $match: this.helpers.buildNonCancelledDateMatch(startOfYear, endOfYear) },
+      { $match: this.dashHelpers.buildNonCancelledDateMatch(startOfYear, endOfYear) },
       {
         $group: {
           _id: {
@@ -151,45 +151,70 @@ export class DashboardService {
     ]);
   }
 
-  // ─── Cached Public Methods (called by controller endpoints) ─────────────────
+  // ─── Cached + Safe Public Methods (called directly by controller) ─────────
 
   async getDailySalesCached(): Promise<number> {
-    return this.helpers.cacheOrSet(
-      'dashboard:daily-sales',
-      () => this.getDailySales(),
-      1000 * 30, // 30s
+    return this.cacheHelperService.safeMetric(
+      () =>
+        this.cacheHelperService.cacheOrSet(
+          CACHE_KEYS.DAILY_SALES,
+          () => this.getDailySales(),
+          CACHE_TTL.DAILY_SALES,
+        ),
+      0,
+      CACHE_KEYS.DAILY_SALES,
     );
   }
 
   async getMonthlyRevenueCached(): Promise<number> {
-    return this.helpers.cacheOrSet(
-      'dashboard:monthly-revenue',
-      () => this.getMonthlyRevenue(),
-      1000 * 60, // 1 min
+    return this.cacheHelperService.safeMetric(
+      () =>
+        this.cacheHelperService.cacheOrSet(
+          CACHE_KEYS.MONTHLY_REVENUE,
+          () => this.getMonthlyRevenue(),
+          CACHE_TTL.MONTHLY_REVENUE,
+        ),
+      0,
+      CACHE_KEYS.MONTHLY_REVENUE,
     );
   }
 
   async getOverviewCached(): Promise<MonthlyOverviewItem[]> {
-    return this.helpers.cacheOrSet(
-      'dashboard:overview',
-      () => this.getOverview(),
-      1000 * 60, // 1 min
+    return this.cacheHelperService.safeMetric(
+      () =>
+        this.cacheHelperService.cacheOrSet(
+          CACHE_KEYS.OVERVIEW,
+          () => this.getOverview(),
+          CACHE_TTL.OVERVIEW,
+        ),
+      [],
+      CACHE_KEYS.OVERVIEW,
     );
   }
 
   async getPopularDishesCached(): Promise<PopularDishItem[]> {
-    return this.helpers.cacheOrSet(
-      'dashboard:popular-dishes',
-      () => this.getPopularDishes(),
-      1000 * 60 * 5, // 5 min
+    return this.cacheHelperService.safeMetric(
+      () =>
+        this.cacheHelperService.cacheOrSet(
+          CACHE_KEYS.POPULAR_DISHES,
+          () => this.getPopularDishes(),
+          CACHE_TTL.POPULAR_DISHES,
+        ),
+      [],
+      CACHE_KEYS.POPULAR_DISHES,
     );
   }
 
   async getLowStockItemsCached(): Promise<LowStockItem[]> {
-    return this.helpers.cacheOrSet(
-      'dashboard:low-stock',
-      () => this.getLowStockItems(),
-      1000 * 60 * 2, // 2 min
+    return this.cacheHelperService.safeMetric(
+      () =>
+        this.cacheHelperService.cacheOrSet(
+          CACHE_KEYS.LOW_STOCK,
+          () => this.getLowStockItems(),
+          CACHE_TTL.LOW_STOCK,
+        ),
+      [],
+      CACHE_KEYS.LOW_STOCK,
     );
   }
 

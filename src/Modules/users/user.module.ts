@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { User, UserSchema } from '../../DB/Models/users.model';
-import { UserRepository } from '../../DB/Repository/user.repository';
 import { HashService, EncryptionService, TokenService } from '../../common';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
+import { User, UserSchema } from './models/users.model';
+import { UserRepository } from './repository/user.repository';
 
 @Module({
   imports: [
@@ -22,5 +22,6 @@ import { UserController } from './user.controller';
     JwtService,
     CloudinaryService,
   ],
+  exports: [UserRepository]
 })
 export class UserModule { }

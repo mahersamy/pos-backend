@@ -1,5 +1,5 @@
 import { IsEnum, IsMongoId, IsNotEmpty, IsObject, IsString, ValidateIf } from 'class-validator';
-import { NotificationChannel, NotificationType } from '../../../DB/Models/notification.model';
+import { NotificationChannel, NotificationType } from '../model/notification.model';
 import { Types } from 'mongoose';
 
 export class CreateNotificationDto {

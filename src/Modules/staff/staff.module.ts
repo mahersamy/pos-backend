@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { StaffService } from './staff.service';
 import { StaffController } from './staff.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Staff, StaffSchema } from '../../DB/Models/staff.model';
-import { StaffRepository } from '../../DB/Repository/staff.repository';
+import { Staff, StaffSchema } from './model/staff.model';
+import { StaffRepository } from './repository/staff.repository';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 
 @Module({

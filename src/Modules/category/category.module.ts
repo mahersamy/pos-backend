@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CategoryController } from './category.controller';
 import { CategoryService } from './category.service';
-import { CategoryRepository } from '../../DB/Repository/category.repository';
-import { Category, CategorySchema } from '../../DB/Models/category.model';
-import { MenuRepository } from '../../DB/Repository/menu.repository';
-import { Menu, MenuSchema } from '../../DB/Models/menu.model';
+import { CategoryRepository } from './repository/category.repository';
+import { Category, CategorySchema } from './model/category.model';
+import { MenuRepository } from '../menu/repository/menu.repository';
+import { Menu, MenuSchema } from '../menu/model/menu.model';
 import { CloudinaryModule } from '../../common/services/cloudinary/cloudinary.module';
 
 @Module({

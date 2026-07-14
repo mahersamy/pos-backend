@@ -6,14 +6,12 @@ import {
 } from '@nestjs/common';
 import { isValidObjectId } from 'mongoose';
 import {
-  UserRepository,
-  USER_QUERY_OPTIONS,
-} from '../../DB/Repository/user.repository';
-import {
   HashService,
   ROLE_DEFAULT_PERMISSIONS,
 } from '../../common';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
+import { UserRepository } from './repository/user.repository';
+import { USER_QUERY_OPTIONS } from './constants/user.constants';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';

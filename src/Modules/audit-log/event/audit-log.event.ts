@@ -1,7 +1,7 @@
 import { OnEvent } from '@nestjs/event-emitter'
 import { Injectable } from "@nestjs/common";
 import { AuditLogService } from "../audit-log.service";
-import type { AuditLogDocument } from 'src/DB/Models/aduit-loggs.model';
+import type { AuditLogDocument } from '../model/audit-log.model';
 
 @Injectable()
 export class AuditLogEvent {

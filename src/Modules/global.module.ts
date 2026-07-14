@@ -1,15 +1,13 @@
 import { Global, Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { MongooseModule } from '@nestjs/mongoose';
 import { TokenService } from '../common';
-import { User, UserSchema } from '../DB/Models/users.model';
-import { UserRepository } from '../DB/Repository/user.repository';
+import { UserModule } from './feature.modules';
 @Global()
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    UserModule
   ],
-  providers: [UserRepository, TokenService, JwtService],
-  exports: [UserRepository, TokenService, JwtService],
+  providers: [TokenService, JwtService],
+  exports: [TokenService, JwtService],
 })
 export class GlobalModule {}

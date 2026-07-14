@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Inventory, InventorySchema } from '../../DB/Models/inventory.model';
-import { InventoryRepository } from '../../DB/Repository/inventory.repository';
-import { Order, OrderSchema } from '../../DB/Models/orders.model';
-import { OrderRepository } from '../../DB/Repository/order.repository';
+import { Inventory, InventorySchema } from '../inventory/model/inventory.model';
+import { InventoryRepository } from '../inventory/repository/inventory.repository';
+import { Order, OrderSchema } from './model/orders.model';
+import { OrderRepository } from './repository/order.repository';
 
 @Module({
   imports: [

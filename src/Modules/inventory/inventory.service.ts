@@ -7,16 +7,16 @@ import { isValidObjectId, QueryFilter } from "mongoose";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import {
   InventoryRepository,
-  INVENTORY_QUERY_OPTIONS,
-} from "../../DB/Repository/inventory.repository";
+} from "./repository/inventory.repository";
+import { INVENTORY_QUERY_OPTIONS } from "./constants/inventory.constants";
 import { CreateInventoryDto } from "./dto/create-inventory.dto";
 import { UpdateInventoryDto } from "./dto/update-inventory.dto";
 import { GetAllInventoryDto } from "./dto/get-all-inventory.dto";
-import type { UserDocument } from "../../DB/Models/users.model";
-import { InventoryDocument } from "../../DB/Models/inventory.model";
+import type { UserDocument } from "../users/models/users.model";
+import { InventoryDocument } from "./model/inventory.model";
 import { CloudinaryService } from "../../common/services/cloudinary/cloudinary.service";
-import { CategoryRepository } from "../../DB/Repository/category.repository";
-import { UserRepository } from "../../DB/Repository/user.repository";
+import { CategoryRepository } from "../category/repository/category.repository";
+import { UserRepository } from "../users/repository/user.repository";
 import { Role } from "../../common";
 import { sendLowStockEmail } from "../../common/utils/email/send.email";
 

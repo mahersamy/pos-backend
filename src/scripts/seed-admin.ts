@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import argon2 from 'argon2';
-import { UserSchema } from '../DB/Models/users.model';
+import { UserSchema } from '../Modules/users/models/users.model';
 import { Role } from '../common/Enums/role.enum';
 
 async function seedAdmin() {

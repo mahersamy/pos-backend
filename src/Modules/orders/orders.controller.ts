@@ -20,7 +20,7 @@ import {
   Action,
   Resource,
 } from 'src/common';
-import type { UserDocument } from '../../DB/Models/users.model';
+import type { UserDocument } from '../users/models/users.model';
 
 @ApiTags('Orders')
 @ApiBearerAuth('access-token')

@@ -4,15 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { isValidObjectId, QueryFilter } from 'mongoose';
-import {
-  ReservationRepository,
-  RESERVATION_QUERY_OPTIONS,
-} from '../../DB/Repository/reservation.repository';
+import { ReservationRepository } from './repository/reservation.repository';
+import { RESERVATION_QUERY_OPTIONS } from './constants/reservation.constants';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { GetAllReservationDto } from './dto/get-all-reservation.dto';
-import type { UserDocument } from '../../DB/Models/users.model';
-import { ReservationDocument } from 'src/DB/Models/reservation.model';
+import type { UserDocument } from '../users/models/users.model';
+import { ReservationDocument } from './model/reservation.model';
 
 @Injectable()
 export class ReservationService {

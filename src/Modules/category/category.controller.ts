@@ -24,7 +24,7 @@ import {
   UploadedFilesValidated,
 } from '../../common';
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
-import type { UserDocument } from '../../DB/Models/users.model';
+import type { UserDocument } from '../users/models/users.model';
 
 @ApiTags('Categories')
 @ApiBearerAuth('access-token')

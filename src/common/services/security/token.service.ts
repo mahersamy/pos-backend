@@ -7,7 +7,7 @@ import {
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 import { SignatureLevelEnum } from '../../Enums/signature.enum';
 import { tokenTypeEnum } from '../../Enums/tokeType.enum';
-import { UserRepository } from '../../../DB/Repository/user.repository';
+import { UserRepository } from '../../../Modules/users/repository/user.repository';
 
 export interface JwtPayload {
   _id: string;

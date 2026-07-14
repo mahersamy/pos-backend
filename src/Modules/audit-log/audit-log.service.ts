@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import {
-  AuditLogRepository,
-  AUDIT_LOG_QUERY_OPTIONS,
-} from "../../DB/Repository/audit-log.repository";
-import { AuditLogDocument } from "../../DB/Models/aduit-loggs.model";
+import { AuditLogRepository } from "./repository/audit-log.repository";
+import { AUDIT_LOG_QUERY_OPTIONS } from "./constants/audit-log.constants";
+import { AuditLogDocument } from "./model/audit-log.model";
 import { GetAllAuditLogDto } from "./dto/get-all-audit-log.dto";
 
 @Injectable()

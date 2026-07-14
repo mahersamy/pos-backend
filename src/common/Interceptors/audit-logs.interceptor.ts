@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
-import { AuditAction } from "../../DB/Models/aduit-loggs.model";
+import { AuditAction } from "../../Modules/audit-log/model/audit-log.model";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 
 @Injectable()

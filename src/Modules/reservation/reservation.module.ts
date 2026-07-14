@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ReservationController } from './reservation.controller';
 import { ReservationService } from './reservation.service';
-import { ReservationRepository } from '../../DB/Repository/reservation.repository';
+import { ReservationRepository } from './repository/reservation.repository';
 import {
   Reservation,
   ReservationSchema,
-} from '../../DB/Models/reservation.model';
+} from './model/reservation.model';
 
 @Module({
   imports: [

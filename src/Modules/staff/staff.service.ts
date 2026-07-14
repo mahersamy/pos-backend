@@ -7,8 +7,7 @@ import {
 import { isValidObjectId } from 'mongoose';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
-import { StaffRepository } from '../../DB/Repository/staff.repository';
-import type { UserDocument } from '../../DB/Models/users.model';
+import { StaffRepository } from './repository/staff.repository';
 import { GetAllStaffDto } from './dto/get-all-staff.dto';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 
@@ -16,7 +15,9 @@ import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.s
 import {
   STAFF_SELECT,
   STAFF_POPULATE,
-} from '../../DB/Repository/staff.repository';
+} from './constants/staff.constants';
+import { StaffDocument } from './model/staff.model';
+import type { UserDocument } from '../users/models/users.model';
 
 // Reusable options object
 const STAFF_QUERY_OPTIONS = {

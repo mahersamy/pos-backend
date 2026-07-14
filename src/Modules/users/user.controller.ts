@@ -14,25 +14,25 @@ import {
   AuthUser,
   FilesUpload,
   ParamIdDto,
-  Role,
   tokenTypeEnum,
   UploadedFilesValidated,
 } from '../../common';
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
-import type { UserDocument } from '../../DB/Models/users.model';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { AddPermissonDto } from './dto/add-permisson.dto';
 import { GetAllUserDto } from './dto/get-all-user.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
+import type { UserDocument } from './models/users.model';
+import { Role } from '../../common/Enums/role.enum';
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
 @AuthApply({ tokenType: tokenTypeEnum.Access, roles: [Role.ADMIN] })
 @Controller('users')
 export class UserController {
-  constructor(private readonly _userService: UserService) {}
+  constructor(private readonly _userService: UserService) { }
 
   // ─── PROFILE (no role restriction) ───────────────────────────────────────
   @AuthApply({ tokenType: tokenTypeEnum.Access, roles: [] })

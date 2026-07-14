@@ -6,11 +6,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { LoginBodyDto, RegisterBodyDto } from './auth.dto';
-import { UserRepository } from '../../DB/Repository/user.repository';
+import { UserRepository } from '../users/repository/user.repository';
 import { OtpType, TokenService } from '../../common';
 import { HashService } from '../../common';
 import { EncryptionService } from '../../common';
-import { OtpRepository } from '../../DB/Repository/otp.repository';
+import { OtpRepository } from './repository/otp.repository';
 import { emailEvent } from '../../common/utils/email/email.event';
 import { generateOtp } from '../../common/utils';
 
