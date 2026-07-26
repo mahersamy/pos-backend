@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { sendAnnouncementEmail, sendConfirmEmail, sendOrderNotification } from '../email/send.email';
+import { sendAnnouncementEmail, sendConfirmEmail, sendOrderNotification, sendNewUserEmail } from '../email/send.email';
 
 export const emailEvent = new EventEmitter();
 
@@ -56,4 +56,14 @@ emailEvent.on(
     });
   },
 );
-  
+
+emailEvent.on(
+  'sendNewUserEmail',
+  async (email: string, password?: string) => {
+    await sendNewUserEmail(
+      email,
+      'Welcome to our POS System',
+      password,
+    );
+  },
+);

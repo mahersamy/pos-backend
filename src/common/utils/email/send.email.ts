@@ -3,6 +3,7 @@ import { verifyEmailTemplate } from "./templates/verify.email.template";
 import { orderPlacedTemplate } from "./templates/notification.templates";
 import { lowStockEmailTemplate } from "./templates/low-stock.template";
 import { announcementEmailTemplate } from "./templates/annoucment.tempelate";
+import { newUserEmailTemplate } from "./templates/new-user.template";
 
 export async function sendConfirmEmail(
   to: string,
@@ -148,4 +149,36 @@ export async function sendAnnouncementEmail({
     return false;
   }
 
+}
+
+export async function sendNewUserEmail(
+  to: string,
+  subject: string,
+  password?: string,
+) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    html: newUserEmailTemplate(to, password, subject),
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent to:", to);
+    return true;
+  } catch (error) {
+    console.error("❌ Error sending email:", error);
+    return false;
+  }
 }

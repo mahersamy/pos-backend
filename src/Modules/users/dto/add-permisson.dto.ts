@@ -25,6 +25,8 @@ export class ActionPermissionsDto {
 /** Full permissions map sent in the request body */
 export class UpdatePermissionsDto {
   @IsObject()
+  @ValidateNested({ each: true })
+  @Type(() => ActionPermissionsDto)
   permissions: Partial<Record<Resource, ActionPermissionsDto>>;
 }
 

@@ -15,7 +15,7 @@ export type FindOptions<T> = QueryOptions<T> & {
 };
 
 export abstract class BaseRepository<T> {
-  constructor(protected readonly model: Model<T>) {}
+  constructor(protected readonly model: Model<T>) { }
 
   // Helper method to handle select
   protected applySelect<Q>(
@@ -110,13 +110,13 @@ export abstract class BaseRepository<T> {
   }
 
   // ==================== UPDATE ====================
-  async findOneAndUpdate(
+  async findOneAndReplace(
     filter: QueryFilter<T>,
     update: UpdateQuery<T>,
     options?: FindOptions<T>,
   ): Promise<T | null> {
     const { populate, select, ...queryOptions } = options || {};
-    let query = this.model.findOneAndUpdate(filter, update, {
+    let query = this.model.findOneAndReplace(filter, update, {
       returnDocument: 'after',
       ...queryOptions,
     });

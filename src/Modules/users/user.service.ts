@@ -18,6 +18,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { AddPermissonDto } from './dto/add-permisson.dto';
 import { GetAllUserDto } from './dto/get-all-user.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
+import { emailEvent } from '../../common/utils/email/email.event';
 
 @Injectable()
 export class UserService {
@@ -25,7 +26,7 @@ export class UserService {
     private readonly _userRepository: UserRepository,
     private readonly _hashService: HashService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
   async createUser(user: CreateUserDto) {
@@ -44,6 +45,8 @@ export class UserService {
       password: hashedPassword,
       permissions: defaultPermissions,
     });
+
+    emailEvent.emit('sendNewUserEmail', user.email, user.password);
 
     return {
       message: 'Create User Successfully',
@@ -184,7 +187,15 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    // Merge incoming permissions into existing ones (deep merge per resource)
+    // const mergedPermissions = { ...user.permissions };
+
+    // for (const [resource, actions] of Object.entries(body.permissions)) {
+    //   mergedPermissions[resource] = {
+    //     ...(mergedPermissions[resource] ?? {}),
+    //     ...actions,
+    //   };
+    // }
+
     const updated = await this._userRepository.findByIdAndUpdate(
       id,
       { permissions: body.permissions },

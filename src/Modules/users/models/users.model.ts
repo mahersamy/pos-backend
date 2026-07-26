@@ -56,8 +56,19 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// UserSchema.virtual('otp', {
-//   ref: 'Otp',
-//   localField: '_id',
-//   foreignField: 'createdBy',
+// Default list
+UserSchema.index({
+    createdAt: -1
+});
+
+// Role filter
+UserSchema.index({
+    role: 1,
+    createdAt: -1
+});
+
+// // Status filter
+// UserSchema.index({
+//     active: 1,
+//     createdAt: -1
 // });

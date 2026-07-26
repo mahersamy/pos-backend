@@ -15,7 +15,7 @@ export class OrdersService {
   constructor(
     private readonly inventoryRepo: InventoryRepository,
     private readonly orderRepo: OrderRepository,
-  ) {}
+  ) { }
 
   async create(createOrderDto: CreateOrderDto, user: UserDocument) {
     // 1️⃣ Extract IDs
@@ -65,7 +65,7 @@ export class OrdersService {
       const stockStatus =
         newQuantity === 0 ? InventoryStock.OUTOFSTOCK : inventory.stock;
 
-      await this.inventoryRepo.findOneAndUpdate(
+      await this.inventoryRepo.findOneAndReplace(
         { _id: inventory._id },
         {
           $inc: { quantity: -item.quantity },
@@ -107,7 +107,7 @@ export class OrdersService {
 
     if (search) {
       filter.$or = [
-        { orderNumber: { $regex: search, $options: 'i' } },
+        { orderNumber: search },
         { guestName: { $regex: search, $options: 'i' } },
       ];
     }
@@ -141,7 +141,7 @@ export class OrdersService {
       }
       // Restock inventory items when an order is cancelled
       for (const item of existingOrder.orderItems) {
-        await this.inventoryRepo.findOneAndUpdate(
+        await this.inventoryRepo.findOneAndReplace(
           { _id: item.inventory },
           {
             $inc: { quantity: item.quantity },

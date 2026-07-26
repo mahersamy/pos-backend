@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { NotificationRepository } from './repository/notification.repository';
 import { NOTIFICATION_QUERY_OPTIONS } from './constants/notification.constants';
 import { UserRepository } from '../users/repository/user.repository';
@@ -194,13 +194,15 @@ export class NotificationService {
   }
 
   async addFcmToken(userId: Types.ObjectId, token: string) {
+    if (!token) throw new BadRequestException('FCM token is required');
+
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    await this.fcmTokenRepository.findOneAndUpdate(
+    await this.fcmTokenRepository.findOneAndReplace(
       { token },
-      { $set: { userId } },
-      { upsert: true, new: true }
+      { token, userId },
+      { upsert: true }
     );
     return { message: 'Token added successfully' };
   }

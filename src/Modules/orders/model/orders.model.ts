@@ -65,4 +65,24 @@ export class Order {
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
-OrderSchema.index({ createdBy: 1 });
+// Default list
+OrderSchema.index({
+    createdAt:-1
+});
+
+// Status filter
+OrderSchema.index({
+    status:1,
+    createdAt:-1
+});
+
+// Order type filter
+OrderSchema.index({
+    orderType:1,
+    createdAt:-1
+});
+
+// Search by order number
+OrderSchema.index({
+    orderNumber:1
+});

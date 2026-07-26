@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { Role } from '../../Enums';
 import { Reflector } from '@nestjs/core';
@@ -26,7 +26,9 @@ export class AuthorizationGuard implements CanActivate {
     }
     if (accessRoles.length > 0) {
       // console.log(accessRoles.includes(role));
-      if (!role || !accessRoles.includes(role)) return false;
+      if (!role || !accessRoles.includes(role)) {
+        throw new ForbiddenException('Insufficient role');
+      }
     }
     return true;
   }

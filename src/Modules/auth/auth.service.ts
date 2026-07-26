@@ -1,27 +1,19 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
-  NotFoundException,
-  UnauthorizedException,
+
 } from '@nestjs/common';
 import { LoginBodyDto, RegisterBodyDto } from './auth.dto';
 import { UserRepository } from '../users/repository/user.repository';
-import { OtpType, TokenService } from '../../common';
+import { TokenService } from '../../common';
 import { HashService } from '../../common';
-import { EncryptionService } from '../../common';
-import { OtpRepository } from './repository/otp.repository';
-import { emailEvent } from '../../common/utils/email/email.event';
-import { generateOtp } from '../../common/utils';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly _userRepo: UserRepository,
-    private readonly _otpRepo: OtpRepository,
     private readonly _hashService: HashService,
     private readonly _tokenService: TokenService,
-    private readonly _encryptionService: EncryptionService,
   ) {}
 
   async login(user: LoginBodyDto) {
@@ -40,7 +32,8 @@ export class AuthService {
       {
         _id: existingUser._id,
         role: existingUser.role,
-        permissions: existingUser.permissions,
+        // permissions intentionally omitted — PermissionGuard reads the live
+        // DB value attached by AuthGuard.decodeToken, not the JWT claim.
       },
       { expiresIn: '1y', secret: process.env.JWT_SECRET_BEARER_ACCESS },
     );
