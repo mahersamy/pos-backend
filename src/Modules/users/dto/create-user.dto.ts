@@ -38,11 +38,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsOptional()
-  address: string;
-
-  @IsString()
-  @IsOptional()
-  profilePicture: string;
+  address?: string;
 
   @Min(14, { message: 'age must be at least 14' })
   age: number;

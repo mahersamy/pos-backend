@@ -55,7 +55,7 @@ export class UserController {
       email,
       role,
       permissions,
-      profilePicture,
+      profilePicture: profilePicture?.secure_url ?? null,
       age,
       address,
       _id,
@@ -100,9 +100,10 @@ export class UserController {
   @Patch(':id/image')
   addImage(
     @Param() { id }: ParamIdDto,
-    @UploadedFilesValidated() images: Express.Multer.File[],
+    @UploadedFilesValidated({ fileIsRequired: true })
+    images: Express.Multer.File[],
   ) {
-    return this._userService.addImage(id, images[0]);
+    return this._userService.addImage(id, images?.[0]);
   }
 
   // ─── DELETE ───────────────────────────────────────────────────────────────

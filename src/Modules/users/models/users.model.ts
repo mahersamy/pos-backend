@@ -37,8 +37,8 @@ export class User {
   @Prop({ type: String })
   address: string;
 
-  @Prop({ type: String })
-  profilePicture: string;
+  @Prop({ _id: false, type: { public_id: String, secure_url: String } })
+  profilePicture: { public_id: string; secure_url: string };
 
   @Prop({ type: String, enum: UserStatus, default: UserStatus.ACTIVE })
   active: UserStatus;

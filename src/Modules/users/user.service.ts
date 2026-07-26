@@ -123,6 +123,12 @@ export class UserService {
     if (!user) throw new NotFoundException('User not found');
     if (!image) throw new BadRequestException('No image provided');
 
+    if (user.profilePicture?.public_id) {
+      await this.cloudinaryService.deleteFile(
+        String(user.profilePicture.public_id),
+      );
+    }
+
     const [uploaded] = await this.cloudinaryService.uploadFiles([image], {
       folder: 'users',
       quality: 60,
@@ -131,7 +137,12 @@ export class UserService {
 
     const updated = await this._userRepository.findByIdAndUpdate(
       id,
-      { profilePicture: uploaded.secure_url },
+      {
+        profilePicture: {
+          secure_url: uploaded.secure_url,
+          public_id: uploaded.public_id,
+        },
+      },
       USER_QUERY_OPTIONS,
     );
 
@@ -158,6 +169,12 @@ export class UserService {
   async remove(id: string) {
     const user = await this._userRepository.findById(id);
     if (!user) throw new NotFoundException('User not found');
+
+    if (user.profilePicture?.public_id) {
+      await this.cloudinaryService.deleteFile(
+        String(user.profilePicture.public_id),
+      );
+    }
 
     await this._userRepository.findByIdAndDelete(id);
     return 'User deleted successfully';

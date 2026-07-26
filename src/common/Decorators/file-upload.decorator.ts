@@ -24,7 +24,7 @@ export function FileUpload(options: FileUploadOptions = {}) {
 export function UploadedFileValidated(options: FileUploadOptions = {}) {
   const {
     maxSize = 5 * 1024 * 1024, // 5MB default
-    fileType = 'image/(jpeg|png|jpg)',
+    fileType = 'image/(jpeg|png|jpg|webp)',
     fileIsRequired = false,
   } = options;
 
@@ -34,7 +34,6 @@ export function UploadedFileValidated(options: FileUploadOptions = {}) {
         new MaxFileSizeValidator({ maxSize }),
         new FileTypeValidator({
           fileType,
-          skipMagicNumbersValidation: true,
         }),
       ],
       fileIsRequired,
@@ -55,7 +54,7 @@ export function FilesUpload(
 export function UploadedFilesValidated(options: FileUploadOptions = {}) {
   const {
     maxSize = 5 * 1024 * 1024, // 5MB default
-    fileType = 'image/(jpeg|png|jpg)',
+    fileType = 'image/(jpeg|png|jpg|webp)',
     fileIsRequired = false,
   } = options;
 
@@ -65,7 +64,6 @@ export function UploadedFilesValidated(options: FileUploadOptions = {}) {
         new MaxFileSizeValidator({ maxSize }),
         new FileTypeValidator({
           fileType,
-          skipMagicNumbersValidation: true,
         }),
       ],
       fileIsRequired,

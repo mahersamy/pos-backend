@@ -56,10 +56,6 @@ export class RegisterBodyDto {
   @IsOptional()
   address: string;
 
-  @IsString()
-  @IsOptional()
-  profilePicture: string;
-
   @Min(14, { message: 'age must be at least 14' })
   age: number;
 }
