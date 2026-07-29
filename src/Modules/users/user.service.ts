@@ -9,6 +9,8 @@ import {
   HashService,
   ROLE_DEFAULT_PERMISSIONS,
 } from '../../common';
+import { USER_EVENTS, UserCreatedEvent } from './event/user-created.event';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 import { UserRepository } from './repository/user.repository';
 import { USER_QUERY_OPTIONS } from './constants/user.constants';
@@ -26,6 +28,7 @@ export class UserService {
     private readonly _userRepository: UserRepository,
     private readonly _hashService: HashService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly eventEmitter: EventEmitter2,
   ) { }
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
@@ -46,7 +49,14 @@ export class UserService {
       permissions: defaultPermissions,
     });
 
-    emailEvent.emit('sendNewUserEmail', user.email, user.password);
+    this.eventEmitter.emit(
+      USER_EVENTS.CREATED,
+      new UserCreatedEvent({
+        userId: newUser._id.toString(),
+        email: user.email,
+        password: user.password,
+      }),
+    );
 
     return {
       message: 'Create User Successfully',

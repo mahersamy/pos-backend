@@ -9,12 +9,15 @@ import { OrderRepository } from './repository/order.repository';
 import { ORDER_QUERY_OPTIONS } from './constants/orders.constants';
 import { OrderItem } from './model/orders.model';
 import { OrderStatus, InventoryStock } from '../../common';
+import { OrderCreatedEvent, ORDER_EVENTS } from './event/order-created.event';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly inventoryRepo: InventoryRepository,
     private readonly orderRepo: OrderRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) { }
 
   async create(createOrderDto: CreateOrderDto, user: UserDocument) {
@@ -79,7 +82,7 @@ export class OrdersService {
     const orderNumber = `#${(orderCount + 1).toString().padStart(3, '0')}`;
 
     // 7️⃣ Create order
-    return this.orderRepo.createAndReturn({
+    const order = await this.orderRepo.createAndReturn({
       orderNumber,
       orderItems,
       totalAmount: parseFloat(totalAmount.toFixed(2)),
@@ -90,6 +93,18 @@ export class OrdersService {
       phoneNumber: createOrderDto.phoneNumber,
       createdBy: user._id,
     });
+
+    this.eventEmitter.emit(
+      ORDER_EVENTS.CREATED,
+      new OrderCreatedEvent({
+        orderId: order._id.toString(),
+        orderNumber: order.orderNumber,
+        totalAmount: order.totalAmount,
+        createdBy: user._id.toString(),
+      }),
+    );
+
+    return order;
   }
 
   async findAll(query: GetAllOrderDto) {

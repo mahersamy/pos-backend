@@ -7,6 +7,7 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { User, UserSchema } from './models/users.model';
 import { UserRepository } from './repository/user.repository';
+import { UserNotificationListener } from './event/user.listener';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { UserRepository } from './repository/user.repository';
     TokenService,
     JwtService,
     CloudinaryService,
+    UserNotificationListener,
   ],
   exports: [UserRepository]
 })
