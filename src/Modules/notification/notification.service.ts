@@ -145,7 +145,6 @@ export class NotificationService {
 
   async markAsRead(userId: Types.ObjectId, notificationIds: Types.ObjectId[]) {
     const result = await this.notificationRepository.updateMany({ _id: { $in: notificationIds }, userId: userId.toString() }, { status: NotificationStatus.READ, readAt: new Date() });
-    console.log(result)
     if (result.modifiedCount === 0) {
       throw new NotFoundException('Notification not found');
     }
@@ -205,6 +204,25 @@ export class NotificationService {
       { upsert: true }
     );
     return { message: 'Token added successfully' };
+  }
+
+  async notifyUser(
+    userId: Types.ObjectId,
+    type: NotificationType,
+    title: string,
+    messageBody: string,
+    metadata?: Record<string, any>,
+    channel: NotificationChannel = NotificationChannel.PUSH,
+  ) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    switch (channel) {
+      case NotificationChannel.EMAIL:
+        return this.sendEmailNotification(userId, type, title, messageBody, NotificationStatus.SENT, metadata);
+      case NotificationChannel.PUSH:
+        return this.sendPushNotification(userId, type, title, messageBody, NotificationStatus.PENDING, metadata);
+    }
   }
 
   async sendNotification(

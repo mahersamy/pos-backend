@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { GetAllOrderDto } from './dto/get-all-order.dto';
@@ -9,15 +10,12 @@ import { OrderRepository } from './repository/order.repository';
 import { ORDER_QUERY_OPTIONS } from './constants/orders.constants';
 import { OrderItem } from './model/orders.model';
 import { OrderStatus, InventoryStock } from '../../common';
-import { OrderCreatedEvent, ORDER_EVENTS } from './event/order-created.event';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly inventoryRepo: InventoryRepository,
     private readonly orderRepo: OrderRepository,
-    private readonly eventEmitter: EventEmitter2,
   ) { }
 
   async create(createOrderDto: CreateOrderDto, user: UserDocument) {
@@ -93,16 +91,6 @@ export class OrdersService {
       phoneNumber: createOrderDto.phoneNumber,
       createdBy: user._id,
     });
-
-    this.eventEmitter.emit(
-      ORDER_EVENTS.CREATED,
-      new OrderCreatedEvent({
-        orderId: order._id.toString(),
-        orderNumber: order.orderNumber,
-        totalAmount: order.totalAmount,
-        createdBy: user._id.toString(),
-      }),
-    );
 
     return order;
   }

@@ -31,7 +31,6 @@ export class AuditLogInterceptor implements NestInterceptor {
 
           // Opt out of interceptor logging for critical paths where service-level logging is used
           const manualLogEntities = [
-            "orders",
             "refunds",
             "payments",
             "stock-updates",

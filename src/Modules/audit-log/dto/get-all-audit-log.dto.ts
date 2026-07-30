@@ -1,5 +1,4 @@
 import { IsEnum, IsMongoId, IsOptional, IsString } from "class-validator";
-import { Type } from "class-transformer";
 import { AuditAction } from "../model/audit-log.model";
 import { GetAllDto } from "src/common/Dto/get-all.dto";
 

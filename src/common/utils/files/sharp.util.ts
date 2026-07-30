@@ -13,19 +13,23 @@ export const compressImage = async (
   fileBuffer: Buffer,
   options: CompressImageOptions,
 ): Promise<Buffer> => {
-  const { maxWidth, maxHeight, quality = 70, fit = 'cover', toWebp } = options;
+  const {
+    maxWidth = 1200,
+    maxHeight = 1200,
+    quality = 70,
+    fit = 'cover',
+    toWebp,
+  } = options;
 
   let sharpInstance = sharp(fileBuffer, { failOnError: false }).rotate();
 
-  // Resize if dimensions are provided
-  if (maxWidth || maxHeight) {
-    sharpInstance = sharpInstance.resize({
-      fit: fit,
-      width: maxWidth,
-      height: maxHeight,
-      withoutEnlargement: true,
-    });
-  }
+  // Always resize to cap large images and reduce upload payload
+  sharpInstance = sharpInstance.resize({
+    fit: fit,
+    width: maxWidth,
+    height: maxHeight,
+    withoutEnlargement: true,
+  });
 
   if (toWebp) {
     sharpInstance = sharpInstance.webp({ quality });

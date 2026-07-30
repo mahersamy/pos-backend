@@ -20,7 +20,6 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { AddPermissonDto } from './dto/add-permisson.dto';
 import { GetAllUserDto } from './dto/get-all-user.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
-import { emailEvent } from '../../common/utils/email/email.event';
 
 @Injectable()
 export class UserService {

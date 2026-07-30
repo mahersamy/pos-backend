@@ -10,7 +10,6 @@ import {
 import { FirebaseService } from '../../common/services/firebase/firebase.service';
 import { FcmToken, FcmTokenSchema } from '../users/models/fcm-token.model';
 import { FcmTokenRepository } from '../users/repository/fcm-token.repository';
-import { OrderNotificationListener } from './event/order.listener';
 
 import { UserModule } from '../users/user.module';
 
@@ -23,7 +22,12 @@ import { UserModule } from '../users/user.module';
     UserModule,
   ],
   controllers: [NotificationController],
-  providers: [NotificationService, NotificationRepository, FirebaseService, FcmTokenRepository, OrderNotificationListener],
+  providers: [
+    NotificationService,
+    NotificationRepository,
+    FirebaseService,
+    FcmTokenRepository,
+  ],
   exports: [NotificationService],
 })
 export class NotificationModule {}
