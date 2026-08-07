@@ -7,7 +7,6 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiOkResponse, ApiCreatedResponse, ApiConsumes } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';

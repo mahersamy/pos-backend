@@ -27,7 +27,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DatabaseModule } from "./common/database/database.module";
 import { AppCacheModule } from "./common/cache/cache.module";
-// import { validate } from "./common/Config/env.validation";
+import { validate } from "./common/Config/env.validation";
 
 @Module({
   imports: [
@@ -48,7 +48,7 @@ import { AppCacheModule } from "./common/cache/cache.module";
     ConfigModule.forRoot({
       isGlobal: true, // makes it available app-wide (no need to import in every module)
       envFilePath: ".env", // default, can specify other paths
-      // validate: validate,
+      validate: validate,
     }),
 
     // Database

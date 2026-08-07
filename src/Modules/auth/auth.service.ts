@@ -35,11 +35,11 @@ export class AuthService {
         // permissions intentionally omitted — PermissionGuard reads the live
         // DB value attached by AuthGuard.decodeToken, not the JWT claim.
       },
-      { expiresIn: '1y', secret: process.env.JWT_SECRET_BEARER_ACCESS },
+      { expiresIn: Number(process.env.JWT_BEARER_ACCESS_EXP), secret: process.env.JWT_SECRET_BEARER_ACCESS },
     );
     const refreshToken = await this._tokenService.generateToken(
       { _id: existingUser._id },
-      { expiresIn: '1y', secret: process.env.JWT_SECRET_BEARER_REFRESH },
+      { expiresIn: Number(process.env.JWT_REFRESH_BEARER_EXP), secret: process.env.JWT_SECRET_BEARER_REFRESH },
     );
     return {
       credential: {

@@ -67,7 +67,7 @@ export class TokenService {
     SignatureLevel: SignatureLevelEnum = SignatureLevelEnum.Bearer,
   ) {
     let secretAccessKey = process.env.JWT_SECRET_BEARER_ACCESS;
-    let AccessExpiresIn = process.env.JWT_ACCESS_BEARER_EXP;
+    let AccessExpiresIn = process.env.JWT_BEARER_ACCESS_EXP;
     let secretRefreshKey = process.env.JWT_SECRET_BEARER_REFRESH;
     let RefreshExpiresIn = process.env.JWT_REFRESH_BEARER_EXP;
     switch (SignatureLevel) {
