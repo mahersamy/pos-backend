@@ -8,10 +8,10 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { StaffService } from './staff.service';
-import { CreateStaffDto } from './dto/create-staff.dto';
-import { UpdateStaffDto } from './dto/update-staff.dto';
+import { CreateStaffDto } from './dto/request/create-staff.dto';
+import { UpdateStaffDto } from './dto/request/update-staff.dto';
 import {
   Action,
   AuthUser,
@@ -24,23 +24,25 @@ import {
 } from '../../common';
 import { AuthApply } from '../../common/Decorators/authApply.decorator';
 import type { UserDocument } from '../users/models/users.model';
-import { GetAllStaffDto } from './dto/get-all-staff.dto';
-import { DeleteManyStaffDto } from './dto/delete-many-staff.dto';
+import { GetAllStaffDto } from './dto/request/get-all-staff.dto';
+import { DeleteManyStaffDto } from './dto/request/delete-many-staff.dto';
+import { StaffResponseDto, PaginatedStaffResponseDto } from './dto/response/staff-response.dto';
 
 @ApiTags('Staff')
 @ApiBearerAuth('access-token')
 @AuthApply({ roles: [Role.ADMIN, Role.MANAGER] })
 @Controller('staff')
 export class StaffController {
-  constructor(private readonly staffService: StaffService) {}
+  constructor(private readonly staffService: StaffService) { }
 
   @CheckPermissions({ resource: Resource.STAFF, actions: [Action.WRITE] })
   @Post()
+  @ApiCreatedResponse({ type: StaffResponseDto, description: 'Staff successfully created' })
   create(
     @Body() createStaffDto: CreateStaffDto,
     @AuthUser() user: UserDocument,
-  ) {
-    return this.staffService.create(createStaffDto, user);
+  ): Promise<StaffResponseDto> {
+    return this.staffService.create(createStaffDto, user) as any;
   }
 
   @CheckPermissions({
@@ -49,29 +51,33 @@ export class StaffController {
   })
   @FilesUpload({ fieldName: 'image' })
   @Patch(':id/image')
+  @ApiOkResponse({ type: StaffResponseDto, description: 'Staff image uploaded successfully' })
   addImages(
     @Param() { id }: ParamIdDto,
     @UploadedFilesValidated({ fileIsRequired: true })
     images: Express.Multer.File[],
-  ) {
-    return this.staffService.addImage(id, images?.[0]);
+  ): Promise<StaffResponseDto> {
+    return this.staffService.addImage(id, images?.[0]) as any;
   }
   @CheckPermissions({ resource: Resource.STAFF, actions: [Action.READ] })
   @Get()
-  findAll(@Query() query: GetAllStaffDto) {
-    return this.staffService.findAll(query);
+  @ApiOkResponse({ type: PaginatedStaffResponseDto, description: 'List of staff members' })
+  findAll(@Query() query: GetAllStaffDto): Promise<PaginatedStaffResponseDto> {
+    return this.staffService.findAll(query) as any;
   }
 
   @CheckPermissions({ resource: Resource.STAFF, actions: [Action.READ] })
   @Get(':id')
-  findOne(@Param() { id }: ParamIdDto) {
-    return this.staffService.findOne(id);
+  @ApiOkResponse({ type: StaffResponseDto, description: 'Staff member details' })
+  findOne(@Param() { id }: ParamIdDto): Promise<StaffResponseDto> {
+    return this.staffService.findOne(id) as any;
   }
 
   @CheckPermissions({ resource: Resource.STAFF, actions: [Action.WRITE] })
   @Patch(':id')
-  update(@Param() { id }: ParamIdDto, @Body() updateStaffDto: UpdateStaffDto) {
-    return this.staffService.update(id, updateStaffDto);
+  @ApiOkResponse({ type: StaffResponseDto, description: 'Staff successfully updated' })
+  update(@Param() { id }: ParamIdDto, @Body() updateStaffDto: UpdateStaffDto): Promise<StaffResponseDto> {
+    return this.staffService.update(id, updateStaffDto) as any;
   }
 
   @CheckPermissions({ resource: Resource.STAFF, actions: [Action.DELETE] })

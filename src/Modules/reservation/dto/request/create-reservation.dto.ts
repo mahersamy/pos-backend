@@ -9,7 +9,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { IsTimeFormat } from '../../../common';
+import { IsTimeFormat } from '../../../../common';
 
 export enum ReservationStatus {
   PENDING = 'pending',

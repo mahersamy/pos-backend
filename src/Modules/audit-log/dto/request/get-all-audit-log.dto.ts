@@ -1,6 +1,6 @@
 import { IsEnum, IsMongoId, IsOptional, IsString } from "class-validator";
-import { AuditAction } from "../model/audit-log.model";
-import { GetAllDto } from "src/common/Dto/get-all.dto";
+import { AuditAction } from "../../model/audit-log.model";
+import { GetAllDto } from "../../../../common/Dto/get-all.dto";
 
 export class GetAllAuditLogDto extends GetAllDto {
   @IsOptional()

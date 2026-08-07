@@ -55,5 +55,18 @@ StaffSchema.virtual("age").get(function () {
   return age;
 });
 
-// indexes
-StaffSchema.index({ email: 1, phoneNumber: 1 });
+StaffSchema.index({ createdAt: -1 });
+
+StaffSchema.index({
+    email: 1,
+    createdAt: -1
+});
+
+StaffSchema.index({
+    phoneNumber: 1,
+    createdAt: -1
+});
+
+
+
+

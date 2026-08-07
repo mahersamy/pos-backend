@@ -34,6 +34,7 @@ export class AuditLogInterceptor implements NestInterceptor {
             "refunds",
             "payments",
             "stock-updates",
+            "notification"
           ];
           if (manualLogEntities.includes(entity)) {
             return; // Exit early, let the service handle the detailed audit log

@@ -14,12 +14,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 import { UserRepository } from './repository/user.repository';
 import { USER_QUERY_OPTIONS } from './constants/user.constants';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
-import { AddPermissonDto } from './dto/add-permisson.dto';
-import { GetAllUserDto } from './dto/get-all-user.dto';
-import { ChangeRoleDto } from './dto/change-role.dto';
+import { CreateUserDto } from './dto/request/create-user.dto';
+import { UpdateUserDto } from './dto/request/update-user.dto';
+import { UpdatePasswordDto } from './dto/request/update-password.dto';
+import { AddPermissonDto } from './dto/request/add-permisson.dto';
+import { GetAllUserDto } from './dto/request/get-all-user.dto';
+import { ChangeRoleDto } from './dto/request/change-role.dto';
 
 @Injectable()
 export class UserService {

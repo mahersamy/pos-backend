@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { GetAllOrderDto } from './dto/get-all-order.dto';
+import { CreateOrderDto } from './dto/request/create-order.dto';
+import { UpdateOrderDto } from './dto/request/update-order.dto';
+import { GetAllOrderDto } from './dto/request/get-all-order.dto';
 import { InventoryRepository } from '../inventory/repository/inventory.repository';
 import { InventoryDocument } from '../inventory/model/inventory.model';
 import { UserDocument } from '../users/models/users.model';

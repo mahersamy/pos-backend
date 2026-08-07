@@ -2,12 +2,13 @@ import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { CloudinaryProvider } from "./common/services/cloudinary/cloudinary.provider";
-import { APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import {
   LoggerMiddleware,
   TimeoutInterceptor,
   UnifiedResponseInterceptor,
   AuditLogInterceptor,
+  GlobalExceptionFilter,
 } from "./common";
 import { GlobalModule } from "./Modules/global.module";
 import {
@@ -59,6 +60,7 @@ import { AppCacheModule } from "./common/cache/cache.module";
   controllers: [AppController],
   providers: [
     AppService,
+    { provide: APP_FILTER, useClass: GlobalExceptionFilter },
 
     // Interceptors
     {

@@ -4,11 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { isValidObjectId } from 'mongoose';
-import { CreateStaffDto } from './dto/create-staff.dto';
-import { UpdateStaffDto } from './dto/update-staff.dto';
+import { isValidObjectId, QueryFilter } from 'mongoose';
+import { CreateStaffDto } from './dto/request/create-staff.dto';
+import { UpdateStaffDto } from './dto/request/update-staff.dto';
 import { StaffRepository } from './repository/staff.repository';
-import { GetAllStaffDto } from './dto/get-all-staff.dto';
+import { GetAllStaffDto } from './dto/request/get-all-staff.dto';
+import { StaffResponseDto, PaginatedStaffResponseDto } from './dto/response/staff-response.dto';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
 
 // staff/staff.service.ts
@@ -33,7 +34,7 @@ export class StaffService {
   ) { }
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
-  async create(createStaffDto: CreateStaffDto, user: UserDocument) {
+  async create(createStaffDto: CreateStaffDto, user: UserDocument): Promise<StaffResponseDto> {
     const existingStaff = await this._staffRepository.findOne({
       email: createStaffDto.email,
     });
@@ -47,14 +48,14 @@ export class StaffService {
       createdBy: user._id,
     });
 
-    return staff;
+    return staff as unknown as StaffResponseDto;
   }
 
   // ─── GET ALL ──────────────────────────────────────────────────────────────
-  async findAll(query: GetAllStaffDto) {
+  async findAll(query: GetAllStaffDto): Promise<PaginatedStaffResponseDto> {
     const { page, limit, sort, search, startSalary, endSalary } = query;
 
-    const filter: any = search
+    const filter: QueryFilter<StaffDocument> = search
       ? {
         $or: [
           { fullname: { $regex: search, $options: 'i' } },
@@ -74,22 +75,22 @@ export class StaffService {
       sort: sort === 'asc' ? { createdAt: 1 } : { createdAt: -1 },
       ...STAFF_QUERY_OPTIONS, // ✅ reuse
     });
-    return result
+    return result as unknown as PaginatedStaffResponseDto;
   }
 
   // ─── GET ONE ──────────────────────────────────────────────────────────────
-  async findOne(id: string) {
+  async findOne(id: string): Promise<StaffResponseDto> {
     const staff = await this._staffRepository.findById(
       id,
       {},
       STAFF_QUERY_OPTIONS, // ✅ reuse
     );
     if (!staff) throw new NotFoundException('Staff not found');
-    return staff;
+    return staff as unknown as StaffResponseDto;
   }
 
   // ─── UPDATE ───────────────────────────────────────────────────────────────
-  async update(id: string, updateStaffDto: UpdateStaffDto) {
+  async update(id: string, updateStaffDto: UpdateStaffDto): Promise<StaffResponseDto> {
     const staff = await this._staffRepository.findById(id);
     if (!staff) throw new NotFoundException('Staff not found');
 
@@ -111,11 +112,11 @@ export class StaffService {
       STAFF_QUERY_OPTIONS, // ✅ reuse
     );
 
-    return updated;
+    return updated as unknown as StaffResponseDto;
   }
 
   // ─── ADD / REPLACE IMAGE ──────────────────────────────────────────────────
-  async addImage(id: string, image: Express.Multer.File) {
+  async addImage(id: string, image: Express.Multer.File): Promise<StaffResponseDto> {
     const staff = await this._staffRepository.findById(id);
     if (!staff) throw new NotFoundException('Staff not found');
     if (!image) throw new BadRequestException('No image provided');
@@ -143,7 +144,7 @@ export class StaffService {
       STAFF_QUERY_OPTIONS, // ✅ reuse
     );
 
-    return updated;
+    return updated as unknown as StaffResponseDto;
   }
 
   // ─── DELETE ───────────────────────────────────────────────────────────────

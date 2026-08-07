@@ -9,9 +9,9 @@ import { CategoryRepository } from './repository/category.repository';
 import { CATEGORY_QUERY_OPTIONS } from './constants/category.constants';
 import { MenuRepository } from '../menu/repository/menu.repository';
 import { CloudinaryService } from '../../common/services/cloudinary/cloudinary.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
-import { GetAllCategoryDto } from './dto/get-all-category.dto';
+import { CreateCategoryDto } from './dto/request/create-category.dto';
+import { UpdateCategoryDto } from './dto/request/update-category.dto';
+import { GetAllCategoryDto } from './dto/request/get-all-category.dto';
 import type { UserDocument } from '../users/models/users.model';
 
 @Injectable()

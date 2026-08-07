@@ -6,9 +6,9 @@ import {
 import { isValidObjectId } from 'mongoose';
 import { MenuRepository } from './repository/menu.repository';
 import { MENU_QUERY_OPTIONS } from './constants/menu.constants';
-import { CreateMenuDto } from './dto/create-menu.dto';
-import { UpdateMenuDto } from './dto/update-menu.dto';
-import { GetAllMenuDto } from './dto/get-all-menu.dto';
+import { CreateMenuDto } from './dto/request/create-menu.dto';
+import { UpdateMenuDto } from './dto/request/update-menu.dto';
+import { GetAllMenuDto } from './dto/request/get-all-menu.dto';
 import type { UserDocument } from '../users/models/users.model';
 
 @Injectable()

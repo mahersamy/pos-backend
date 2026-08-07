@@ -1,6 +1,6 @@
 import { IsBoolean, IsObject, IsOptional } from 'class-validator';
 import { Transform, plainToInstance } from 'class-transformer';
-import { Resource } from '../../../common/Enums';
+import { Resource } from '../../../../common/Enums';
 
 /** Boolean flags for a single resource */
 export class ActionPermissionsDto {

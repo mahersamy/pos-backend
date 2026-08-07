@@ -9,9 +9,9 @@ import {
   InventoryRepository,
 } from "./repository/inventory.repository";
 import { INVENTORY_QUERY_OPTIONS } from "./constants/inventory.constants";
-import { CreateInventoryDto } from "./dto/create-inventory.dto";
-import { UpdateInventoryDto } from "./dto/update-inventory.dto";
-import { GetAllInventoryDto } from "./dto/get-all-inventory.dto";
+import { CreateInventoryDto } from "./dto/request/create-inventory.dto";
+import { UpdateInventoryDto } from "./dto/request/update-inventory.dto";
+import { GetAllInventoryDto } from "./dto/request/get-all-inventory.dto";
 import type { UserDocument } from "../users/models/users.model";
 import { InventoryDocument } from "./model/inventory.model";
 import { CloudinaryService } from "../../common/services/cloudinary/cloudinary.service";

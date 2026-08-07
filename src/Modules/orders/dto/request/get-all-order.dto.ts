@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional } from 'class-validator';
-import { GetAllDto } from '../../../common/Dto/get-all.dto';
-import { OrderStatus, OrderType } from '../../../common';
+import { GetAllDto } from '../../../../common/Dto/get-all.dto';
+import { OrderStatus, OrderType } from '../../../../common';
 
 export class GetAllOrderDto extends GetAllDto {
   @IsOptional()

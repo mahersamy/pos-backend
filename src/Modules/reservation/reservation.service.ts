@@ -6,9 +6,9 @@ import {
 import { isValidObjectId, QueryFilter } from 'mongoose';
 import { ReservationRepository } from './repository/reservation.repository';
 import { RESERVATION_QUERY_OPTIONS } from './constants/reservation.constants';
-import { CreateReservationDto } from './dto/create-reservation.dto';
-import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { GetAllReservationDto } from './dto/get-all-reservation.dto';
+import { CreateReservationDto } from './dto/request/create-reservation.dto';
+import { UpdateReservationDto } from './dto/request/update-reservation.dto';
+import { GetAllReservationDto } from './dto/request/get-all-reservation.dto';
 import type { UserDocument } from '../users/models/users.model';
 import { ReservationDocument } from './model/reservation.model';
 
