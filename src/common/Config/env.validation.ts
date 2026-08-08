@@ -63,14 +63,17 @@ class EnvironmentVariables {
   SALT_ROUND: number;
 
   // Admin
+  @IsOptional()
   @IsString()
-  ADMIN_EMAIL: string;
+  ADMIN_EMAIL?: string;
 
+  @IsOptional()
   @IsString()
-  ADMIN_PASSWORD: string;
+  ADMIN_PASSWORD?: string;
 
+  @IsOptional()
   @IsString()
-  ADMIN_PHONE: string;
+  ADMIN_PHONE?: string;
 
   // JWT Bearer
   @IsString()
