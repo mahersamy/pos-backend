@@ -82,7 +82,5 @@ OrderSchema.index({
     createdAt:-1
 });
 
-// Search by order number
-OrderSchema.index({
-    orderNumber:1
-});
+// Search by order number — unique prevents duplicate numbers under concurrent requests
+OrderSchema.index({ orderNumber: 1 }, { unique: true });

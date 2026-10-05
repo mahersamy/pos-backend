@@ -5,13 +5,8 @@ import { lowStockEmailTemplate } from "./templates/low-stock.template";
 import { announcementEmailTemplate } from "./templates/annoucment.tempelate";
 import { newUserEmailTemplate } from "./templates/new-user.template";
 
-export async function sendConfirmEmail(
-  to: string,
-  otp: string,
-  subject: string,
-  title: string,
-) {
-  const transporter = nodemailer.createTransport({
+function createMailTransporter() {
+  return nodemailer.createTransport({
     service: "gmail",
     port: 465,
     secure: true,
@@ -19,7 +14,20 @@ export async function sendConfirmEmail(
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    tls: {
+      // Accept self-signed / intercepted certificates (e.g. corporate proxies)
+      rejectUnauthorized: false,
+    },
   });
+}
+
+export async function sendConfirmEmail(
+  to: string,
+  otp: string,
+  subject: string,
+  title: string,
+) {
+  const transporter = createMailTransporter();
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -54,17 +62,7 @@ export async function sendOrderNotification({
   totalAmount: number;
   items: any[];
 }) {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    port: 465,
-    secure: true,
-    logger: true, // Add this
-    debug: true, // Add this
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const transporter = createMailTransporter();
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -87,15 +85,7 @@ export async function sendLowStockEmail(
   to: string | string[],
   items: any[],
 ) {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const transporter = createMailTransporter();
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -123,15 +113,7 @@ export async function sendAnnouncementEmail({
   subject: string;
   message: string;
 }) {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const transporter = createMailTransporter();
 
    const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -156,15 +138,7 @@ export async function sendNewUserEmail(
   subject: string,
   password?: string,
 ) {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const transporter = createMailTransporter();
 
   const mailOptions = {
     from: process.env.EMAIL_USER,

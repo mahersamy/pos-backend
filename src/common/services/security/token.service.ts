@@ -52,7 +52,7 @@ export class TokenService {
             : signatures.secretAccessKey,
       });
     } catch (error) {
-      throw new BadRequestException('Invalid Token');
+      throw new UnauthorizedException('Invalid Token');
     }
 
     const user = await this.userRepo.findById(decoded._id);

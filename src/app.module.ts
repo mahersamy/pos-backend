@@ -1,8 +1,9 @@
 import { MiddlewareConsumer, Module } from "@nestjs/common";
+import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { CloudinaryProvider } from "./common/services/cloudinary/cloudinary.provider";
-import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import {
   LoggerMiddleware,
   TimeoutInterceptor,
@@ -42,6 +43,13 @@ import { validate } from "./common/Config/env.validation";
     MenuModule,
     NotificationModule,
     ScheduleModule.forRoot(),
+
+    // Rate-limiting
+    ThrottlerModule.forRoot([
+      { name: 'short',  ttl: 1000,  limit: 5  },  // 5 req / second
+      { name: 'medium', ttl: 10000, limit: 20 },  // 20 req / 10 s
+      { name: 'long',   ttl: 60000, limit: 60 },  // 60 req / minute
+    ]),
     EventEmitterModule.forRoot(),
 
     // Config
@@ -61,6 +69,9 @@ import { validate } from "./common/Config/env.validation";
   providers: [
     AppService,
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
+
+    // Throttle guard (global – protects all routes)
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
 
     // Interceptors
     {

@@ -7,8 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags, ApiOperation, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiOperation, ApiOkResponse, ApiCreatedResponse, ApiHeader } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/request/create-order.dto';
 import { UpdateOrderDto } from './dto/request/update-order.dto';
@@ -23,6 +24,7 @@ import {
   CheckPermissions,
   Action,
   Resource,
+  IdempotencyInterceptor,
 } from 'src/common';
 import type { UserDocument } from '../users/models/users.model';
 
@@ -35,7 +37,15 @@ export class OrdersController {
 
   @ApiOperation({ summary: 'Create a new order' })
   @ApiCreatedResponse({ description: 'Order created successfully', type: OrderResponseDto })
+  @ApiHeader({
+    name: 'Idempotency-Key',
+    description:
+      'A unique client-generated key (UUID v4 recommended). Sending the same key within 24 h returns the cached response without re-processing the order.',
+    required: false,
+    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+  })
   @CheckPermissions({ resource: Resource.ORDERS, actions: [Action.WRITE] })
+  @UseInterceptors(IdempotencyInterceptor)
   @Post()
   create(
     @Body() createOrderDto: CreateOrderDto,

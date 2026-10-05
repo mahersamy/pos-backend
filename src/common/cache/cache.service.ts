@@ -9,7 +9,7 @@ export class CacheHelperService {
   constructor(
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
-  ) {}
+  ) { }
 
   async cacheOrSet<T>(
     key: string,

@@ -1,4 +1,5 @@
 import {
+  ClientSession,
   Model,
   ProjectionType,
   QueryFilter,
@@ -12,10 +13,11 @@ import {
 export type FindOptions<T> = QueryOptions<T> & {
   populate?: string | PopulateOptions | (string | PopulateOptions)[];
   select?: string | Record<string, number | boolean | object>;
+  session?: ClientSession;
 };
 
 export abstract class BaseRepository<T> {
-  constructor(protected readonly model: Model<T>) { }
+  constructor(protected readonly model: Model<T>) {}
 
   // Helper method to handle select
   protected applySelect<Q>(
@@ -45,12 +47,17 @@ export abstract class BaseRepository<T> {
   }
 
   // ==================== CREATE ====================
-  async create(data: Partial<T>): Promise<T> {
-    return this.model.create(data);
+  async create(data: Partial<T>, session?: ClientSession): Promise<T> {
+    if (session) {
+      const docs = await this.model.create([data as any], { session });
+      return docs[0] as unknown as T;
+    }
+    return this.model.create(data as any) as unknown as T;
   }
 
-  async createMany(data: Partial<T>[]): Promise<T[]> {
-    return this.model.insertMany(data) as Promise<T[]>;
+  async createMany(data: Partial<T>[], session?: ClientSession): Promise<T[]> {
+    const opts = session ? { session } : {};
+    return this.model.insertMany(data as any[], opts) as unknown as Promise<T[]>;
   }
 
   // ==================== READ ====================
@@ -59,8 +66,11 @@ export abstract class BaseRepository<T> {
     projection?: ProjectionType<T>,
     options?: FindOptions<T>,
   ): Promise<T | null> {
-    const { populate, select, ...queryOptions } = options || {};
-    let query = this.model.findOne(filter, projection, queryOptions);
+    const { populate, select, session, ...queryOptions } = options || {};
+    let query = this.model.findOne(filter, projection, {
+      ...queryOptions,
+      ...(session ? { session } : {}),
+    });
 
     query = this.applyPopulate(query, populate);
     query = this.applySelect(query, select);
@@ -73,8 +83,11 @@ export abstract class BaseRepository<T> {
     projection?: ProjectionType<T>,
     options?: FindOptions<T>,
   ): Promise<T[]> {
-    const { populate, select, ...queryOptions } = options || {};
-    let query = this.model.find(filter, projection, queryOptions);
+    const { populate, select, session, ...queryOptions } = options || {};
+    let query = this.model.find(filter, projection, {
+      ...queryOptions,
+      ...(session ? { session } : {}),
+    });
 
     query = this.applyPopulate(query, populate);
     query = this.applySelect(query, select);
@@ -87,8 +100,11 @@ export abstract class BaseRepository<T> {
     projection?: ProjectionType<T>,
     options?: FindOptions<T>,
   ): Promise<T | null> {
-    const { populate, select, ...queryOptions } = options || {};
-    let query = this.model.findById(id, projection, queryOptions);
+    const { populate, select, session, ...queryOptions } = options || {};
+    let query = this.model.findById(id, projection, {
+      ...queryOptions,
+      ...(session ? { session } : {}),
+    });
 
     query = this.applyPopulate(query, populate);
     query = this.applySelect(query, select);
@@ -110,15 +126,23 @@ export abstract class BaseRepository<T> {
   }
 
   // ==================== UPDATE ====================
-  async findOneAndReplace(
+
+  /**
+   * findOneAndUpdate — session-aware atomic update.
+   * Replaces the old findOneAndReplace (which was semantically wrong for
+   * $inc/$set operations).
+   */
+  async findOneAndUpdate(
     filter: QueryFilter<T>,
     update: UpdateQuery<T>,
     options?: FindOptions<T>,
   ): Promise<T | null> {
-    const { populate, select, ...queryOptions } = options || {};
-    let query = this.model.findOneAndReplace(filter, update, {
+    const { populate, select, session, ...queryOptions } = options || {};
+
+    let query = this.model.findOneAndUpdate(filter, update, {
       returnDocument: 'after',
       ...queryOptions,
+      ...(session ? { session } : {}),
     });
 
     query = this.applyPopulate(query, populate);
@@ -127,15 +151,25 @@ export abstract class BaseRepository<T> {
     return query;
   }
 
+  /** @deprecated Use findOneAndUpdate instead */
+  async findOneAndReplace(
+    filter: QueryFilter<T>,
+    update: UpdateQuery<T>,
+    options?: FindOptions<T>,
+  ): Promise<T | null> {
+    return this.findOneAndUpdate(filter, update, options);
+  }
+
   async findByIdAndUpdate(
     id: string | Types.ObjectId,
     update: UpdateQuery<T>,
     options?: FindOptions<T>,
   ): Promise<T | null> {
-    const { populate, select, ...queryOptions } = options || {};
+    const { populate, select, session, ...queryOptions } = options || {};
     let query = this.model.findByIdAndUpdate(id, update, {
       returnDocument: 'after',
       ...queryOptions,
+      ...(session ? { session } : {}),
     });
 
     query = this.applyPopulate(query, populate);
@@ -202,7 +236,7 @@ export abstract class BaseRepository<T> {
     const { populate, projection, sort, select } = options;
 
     let query = this.model
-      .find(filter, projection, { select })
+      .find(filter, projection)
       .skip(skip)
       .limit(limit);
 
@@ -210,6 +244,7 @@ export abstract class BaseRepository<T> {
       query = query.sort(sort);
     }
 
+    query = this.applySelect(query as any, select);
     query = this.applyPopulate(query, populate);
 
     const [data, total] = await Promise.all([query.exec(), this.count(filter)]);

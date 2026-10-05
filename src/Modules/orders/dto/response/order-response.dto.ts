@@ -45,10 +45,10 @@ export class OrderResponseDto {
   cancellationReason?: string;
 
   @ApiProperty({ description: 'ID of the user who created the order' })
-  createdBy: string;
+  createdBy: Date;
 
   @ApiPropertyOptional({ description: 'ID of the user who last updated the order' })
-  updatedBy?: string;
+  updatedBy?: Date;
 
   @ApiProperty({ description: 'Record creation date' })
   createdAt: Date;

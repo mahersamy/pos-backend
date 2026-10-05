@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import argon2 from 'argon2';
 import { UserSchema } from '../Modules/users/models/users.model';
 import { Role } from '../common/Enums/role.enum';
+import { UserStatus } from 'src/Modules/users/enums/user-status.enum';
 
 async function seedAdmin() {
     await mongoose.connect(process.env.DATABASE_URI!);
@@ -30,10 +31,10 @@ async function seedAdmin() {
         lastName: 'admin',
         email: process.env.ADMIN_EMAIL,
         password,
-        role: 'ADMIN',
+        role: Role.ADMIN,
         age: 30,
-        active: 'active',
-        permissions: {},       // ← flat boolean map, default empty
+        active: UserStatus.ACTIVE,
+        permissions: {},
     });
 
     console.log('✅ Admin created:', process.env.ADMIN_EMAIL);
