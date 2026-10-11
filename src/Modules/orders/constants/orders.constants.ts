@@ -3,10 +3,6 @@ export const ORDER_SELECT =
 
 export const ORDER_POPULATE = [
   {
-    path: 'orderItems.inventory',
-    select: 'name price image.secure_url',
-  },
-  {
     path: 'createdBy',
     select: 'firstName lastName email',
   },
@@ -15,4 +11,5 @@ export const ORDER_POPULATE = [
 export const ORDER_QUERY_OPTIONS = {
   select: ORDER_SELECT,
   populate: ORDER_POPULATE,
+  lean: true,
 };

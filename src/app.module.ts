@@ -46,9 +46,9 @@ import { validate } from "./common/Config/env.validation";
 
     // Rate-limiting
     ThrottlerModule.forRoot([
-      { name: 'short',  ttl: 1000,  limit: 5  },  // 5 req / second
+      { name: 'short', ttl: 1000, limit: 5 },  // 5 req / second
       { name: 'medium', ttl: 10000, limit: 20 },  // 20 req / 10 s
-      { name: 'long',   ttl: 60000, limit: 60 },  // 60 req / minute
+      { name: 'long', ttl: 60000, limit: 60 },  // 60 req / minute
     ]),
     EventEmitterModule.forRoot(),
 

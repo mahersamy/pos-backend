@@ -6,8 +6,17 @@ export class OrderItemResponseDto {
   @ApiProperty({ description: 'Inventory Item ID', example: '60d21b4967d0d8992e610c85' })
   inventory: string;
 
+  @ApiProperty({ description: 'Item name at the time of order', example: 'Espresso' })
+  name: string;
+
+  @ApiProperty({ description: 'Unit price at the time of order', example: 3.5 })
+  unitPrice: number;
+
   @ApiProperty({ description: 'Quantity ordered', example: 2 })
   quantity: number;
+
+  @ApiProperty({ description: 'Line total (unitPrice × quantity)', example: 7.0 })
+  lineTotal: number;
 }
 
 export class OrderResponseDto {

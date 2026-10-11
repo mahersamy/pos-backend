@@ -48,8 +48,15 @@ export class OrdersService {
 
     for (const [idStr, qty] of quantities) {
       const inventory = inventoryMap.get(idStr)!;
-      totalAmount += inventory.price * qty;
-      orderItems.push({ inventory: inventory._id, quantity: qty });
+      const lineTotal = parseFloat((inventory.price * qty).toFixed(2));
+      totalAmount += lineTotal;
+      orderItems.push({
+        inventory: inventory._id,
+        name: inventory.name,
+        unitPrice: inventory.price,
+        quantity: qty,
+        lineTotal,
+      });
     }
 
     // ── 3. Open MongoDB transaction ──────────────────────────────────────────
@@ -123,7 +130,7 @@ export class OrdersService {
     });
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     return this.orderRepo.findById(id, {}, ORDER_QUERY_OPTIONS);
   }
 

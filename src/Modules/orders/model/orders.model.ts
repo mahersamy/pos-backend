@@ -10,8 +10,20 @@ export class OrderItem {
   @Prop({ type: Types.ObjectId, ref: 'Inventory', required: true })
   inventory: Types.ObjectId;
 
-  @Prop({ type: Number, required: true })
+  /** Snapshot of the item name at the time the order was placed. */
+  @Prop({ type: String, required: true })
+  name: string;
+
+  /** Snapshot of the unit price at the time the order was placed. */
+  @Prop({ type: Number, required: true, min: 0 })
+  unitPrice: number;
+
+  @Prop({ type: Number, required: true, min: 1 })
   quantity: number;
+
+  /** Snapshot of the line total (unitPrice × quantity) at the time the order was placed. */
+  @Prop({ type: Number, required: true, min: 0 })
+  lineTotal: number;
 }
 
 const OrderItemSchema = SchemaFactory.createForClass(OrderItem);
