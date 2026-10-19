@@ -2,12 +2,15 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 import { SignatureLevelEnum } from '../../Enums/signature.enum';
 import { tokenTypeEnum } from '../../Enums/tokeType.enum';
 import { UserRepository } from '../../../Modules/users/repository/user.repository';
+import { CacheHelperService } from '../../cache/cache.service';
+import { UserStatus } from '../../../Modules/users/enums/user-status.enum';
 
 export interface JwtPayload {
   _id: string;
@@ -20,6 +23,8 @@ export class TokenService {
   constructor(
     private readonly _jwtService: JwtService,
     private readonly userRepo: UserRepository,
+    @Optional()
+    private readonly cacheHelper?: CacheHelperService,
   ) {}
 
   async generateToken(payload: object, options: JwtSignOptions) {
@@ -40,6 +45,11 @@ export class TokenService {
     if (!signature || !token) {
       throw new UnauthorizedException('missing authorization');
     }
+
+    if (this.cacheHelper && (await this.cacheHelper.isTokenBlacklisted(token))) {
+      throw new UnauthorizedException('Token has been revoked');
+    }
+
     const signatures = await this.getSignatureLevel(
       signature as SignatureLevelEnum,
     );
@@ -60,6 +70,22 @@ export class TokenService {
     if (!user) {
       throw new NotFoundException('User Not Found');
     }
+
+    if (user.active === UserStatus.INACTIVE) {
+      throw new UnauthorizedException('User account is inactive');
+    }
+
+    if (user.changePasswordAt && decoded.iat) {
+      const passwordChangedSeconds = Math.floor(
+        new Date(user.changePasswordAt).getTime() / 1000,
+      );
+      if (passwordChangedSeconds > decoded.iat) {
+        throw new UnauthorizedException(
+          'Token expired due to password change or logout',
+        );
+      }
+    }
+
     return { user, decoded };
   }
 

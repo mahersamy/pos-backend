@@ -24,6 +24,8 @@ export class AuditLogInterceptor implements NestInterceptor {
           let action = AuditAction.UPDATE;
           if (method === "POST") action = AuditAction.CREATE;
           if (method === "DELETE") action = AuditAction.DELETE;
+          if (originalUrl.includes("logout")) action = AuditAction.LOGOUT;
+          if (originalUrl.includes("login")) action = AuditAction.LOGIN;
 
           // Robust entity detection:
           // filters out empty strings before grabbing the resource segment e.g., /api/v1/categories -> categories

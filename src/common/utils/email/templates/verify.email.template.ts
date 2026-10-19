@@ -44,7 +44,7 @@ export const verifyEmailTemplate = (
       <div class="container">
         <h1>Your OTP Code</h1>
         <p style="font-size: 24px; font-weight: bold; color: #007BFF;">${otp}</p>
-        <p>Please use the OTP above to verify your email address. This code will expire in a few minutes.</p>
+        <p>Please use the OTP above to complete your ${title.toLowerCase()} request. This code will expire in a few minutes.</p>
         <div class="footer">
           If you didn’t request this code, you can safely ignore this email.
         </div>

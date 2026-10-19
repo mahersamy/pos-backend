@@ -1,11 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import KeyvRedis, { Keyv } from '@keyv/redis';
 import { CacheHelperService } from './cache.service';
 
-
-
+@Global()
 @Module({
   imports: [
     CacheModule.registerAsync({

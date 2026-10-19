@@ -167,7 +167,7 @@ export class UserService {
 
     await this._userRepository.findByIdAndUpdate(
       id,
-      { password: hashedPassword },
+      { password: hashedPassword, changePasswordAt: new Date() },
       USER_QUERY_OPTIONS,
     );
 

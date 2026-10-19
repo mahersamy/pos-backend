@@ -43,6 +43,9 @@ export class User {
   @Prop({ type: String, enum: UserStatus, default: UserStatus.ACTIVE })
   active: UserStatus;
 
+  @Prop({ type: Date })
+  changePasswordAt?: Date;
+
 
 
   @Virtual({

@@ -37,7 +37,11 @@ export class AuthGuard implements CanActivate {
         break;
     }
     if (!authorization) {
-      throw new UnauthorizedException('missing authorization');
+      if (tokenType === tokenTypeEnum.Refresh && request?.body?.refreshToken) {
+        authorization = `Bearer ${request.body.refreshToken}`;
+      } else {
+        throw new UnauthorizedException('missing authorization');
+      }
     }
     const { user, decoded } = await this._tokenService.decodeToken({
       authorization,

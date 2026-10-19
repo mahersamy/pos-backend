@@ -29,6 +29,40 @@ export class CacheHelperService {
     return freshData;
   }
 
+  async set(key: string, value: any, ttl?: number): Promise<void> {
+    try {
+      await this.cacheManager.set(key, value, ttl);
+    } catch (err: any) {
+      this.logger.error(`Failed to set cache key "${key}": ${err?.message || err}`);
+    }
+  }
+
+  async get<T>(key: string): Promise<T | undefined> {
+    try {
+      return await this.cacheManager.get<T>(key);
+    } catch (err: any) {
+      this.logger.error(`Failed to get cache key "${key}": ${err?.message || err}`);
+      return undefined;
+    }
+  }
+
+  async del(key: string): Promise<void> {
+    try {
+      await this.cacheManager.del(key);
+    } catch (err: any) {
+      this.logger.error(`Failed to delete cache key "${key}": ${err?.message || err}`);
+    }
+  }
+
+  async blacklistToken(token: string, ttlMs: number): Promise<void> {
+    await this.set(`blacklist:${token}`, true, ttlMs);
+  }
+
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    const res = await this.get(`blacklist:${token}`);
+    return Boolean(res);
+  }
+
   /**
    * Runs fn() and returns fallback on failure instead of throwing.
    * Logs the swallowed error so failures are visible in monitoring
