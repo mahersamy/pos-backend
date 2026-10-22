@@ -9,10 +9,17 @@ import { OrderRepository } from './repository/order.repository';
 import { Counter, CounterSchema } from './model/counter.model';
 import { CounterRepository } from './repository/counter.repository';
 
+import {
+  InventoryMovement,
+  InventoryMovementSchema,
+} from '../inventory/model/inventory-movement.model';
+import { InventoryMovementRepository } from '../inventory/repository/inventory-movement.repository';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Inventory.name, schema: InventorySchema },
+      { name: InventoryMovement.name, schema: InventoryMovementSchema },
       { name: Order.name, schema: OrderSchema },
       { name: Counter.name, schema: CounterSchema },
     ]),
@@ -21,6 +28,7 @@ import { CounterRepository } from './repository/counter.repository';
   providers: [
     OrdersService,
     InventoryRepository,
+    InventoryMovementRepository,
     OrderRepository,
     CounterRepository,
   ],

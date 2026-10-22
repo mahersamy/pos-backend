@@ -94,5 +94,12 @@ OrderSchema.index({
     createdAt:-1
 });
 
+// Compound index for sales reporting by status, type, and date
+OrderSchema.index({
+    status: 1,
+    orderType: 1,
+    createdAt: -1,
+});
+
 // Search by order number — unique prevents duplicate numbers under concurrent requests
 OrderSchema.index({ orderNumber: 1 }, { unique: true });

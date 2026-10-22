@@ -8,6 +8,11 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import {
   InventoryRepository,
 } from "./repository/inventory.repository";
+import {
+  InventoryMovementReferenceType,
+  InventoryMovementType,
+} from "./model/inventory-movement.model";
+import { InventoryMovementRepository } from "./repository/inventory-movement.repository";
 import { INVENTORY_QUERY_OPTIONS } from "./constants/inventory.constants";
 import { CreateInventoryDto } from "./dto/request/create-inventory.dto";
 import { UpdateInventoryDto } from "./dto/request/update-inventory.dto";
@@ -24,6 +29,7 @@ import { sendLowStockEmail } from "../../common/utils/email/send.email";
 export class InventoryService {
   constructor(
     private readonly _inventoryRepository: InventoryRepository,
+    private readonly movementRepository: InventoryMovementRepository,
     private readonly cloudinaryService: CloudinaryService,
     private readonly categoryRepository: CategoryRepository,
     private readonly userRepository: UserRepository,
@@ -42,6 +48,20 @@ export class InventoryService {
     };
 
     const inventory = await this._inventoryRepository.createAndReturn(payload);
+
+    if (inventory.quantity > 0) {
+      await this.movementRepository.recordMovement({
+        inventory: inventory._id,
+        type: InventoryMovementType.STOCK_IN,
+        quantityDelta: inventory.quantity,
+        quantityBefore: 0,
+        quantityAfter: inventory.quantity,
+        referenceType: InventoryMovementReferenceType.MANUAL_ADJUSTMENT,
+        actorId: user._id,
+        reason: 'Initial stock on item creation',
+      });
+    }
+
     return inventory;
   }
 
@@ -106,6 +126,26 @@ export class InventoryService {
       payload,
       INVENTORY_QUERY_OPTIONS,
     );
+
+    if (
+      updated &&
+      dto.quantity !== undefined &&
+      dto.quantity !== inventory.quantity
+    ) {
+      const delta = dto.quantity - inventory.quantity;
+      await this.movementRepository.recordMovement({
+        inventory: updated._id,
+        type:
+          delta > 0
+            ? InventoryMovementType.STOCK_IN
+            : InventoryMovementType.ADJUSTMENT,
+        quantityDelta: delta,
+        quantityBefore: inventory.quantity,
+        quantityAfter: dto.quantity,
+        referenceType: InventoryMovementReferenceType.MANUAL_ADJUSTMENT,
+        reason: 'Manual quantity adjustment via inventory update',
+      });
+    }
 
     return updated;
   }

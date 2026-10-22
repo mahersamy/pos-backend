@@ -5,6 +5,11 @@ import { CreateOrderDto } from './dto/request/create-order.dto';
 import { UpdateOrderDto } from './dto/request/update-order.dto';
 import { GetAllOrderDto } from './dto/request/get-all-order.dto';
 import { InventoryRepository } from '../inventory/repository/inventory.repository';
+import {
+  InventoryMovementReferenceType,
+  InventoryMovementType,
+} from '../inventory/model/inventory-movement.model';
+import { InventoryMovementRepository } from '../inventory/repository/inventory-movement.repository';
 import { UserDocument } from '../users/models/users.model';
 import { OrderRepository } from './repository/order.repository';
 import { CounterRepository } from './repository/counter.repository';
@@ -16,6 +21,7 @@ import { OrderStatus } from '../../common';
 export class OrdersService {
   constructor(
     private readonly inventoryRepo: InventoryRepository,
+    private readonly inventoryMovementRepo: InventoryMovementRepository,
     private readonly orderRepo: OrderRepository,
     private readonly counterRepo: CounterRepository,
 
@@ -66,20 +72,27 @@ export class OrdersService {
     try {
       await session.withTransaction(async () => {
         // ── 3a. Atomic stock decrement for every item ────────────────────────
-        await Promise.all(
-          orderItems.map(async (item) => {
-            const updated = await this.inventoryRepo.decrementStock(
-              item.inventory as Types.ObjectId,
-              item.quantity,
-              session,
-            );
+        const decrementedItems: { inventory: Types.ObjectId; quantity: number; quantityBefore: number; quantityAfter: number }[] = [];
 
-            if (!updated) {
-              const name = inventoryMap.get(item.inventory.toString())?.name ?? item.inventory.toString();
-              throw new BadRequestException(`Not enough stock for "${name}"`);
-            }
-          }),
-        );
+        for (const item of orderItems) {
+          const updated = await this.inventoryRepo.decrementStock(
+            item.inventory as Types.ObjectId,
+            item.quantity,
+            session,
+          );
+
+          if (!updated) {
+            const name = inventoryMap.get(item.inventory.toString())?.name ?? item.inventory.toString();
+            throw new BadRequestException(`Not enough stock for "${name}"`);
+          }
+
+          decrementedItems.push({
+            inventory: item.inventory as Types.ObjectId,
+            quantity: item.quantity,
+            quantityBefore: updated.quantity + item.quantity,
+            quantityAfter: updated.quantity,
+          });
+        }
 
         // ── 3b. Atomic counter → collision-free order number ─────────────────
         const sequence = await this.counterRepo.nextSequence('orders', session);
@@ -100,6 +113,24 @@ export class OrdersService {
           },
           session,
         );
+
+        // ── 3d. Record stock movement ledger entries for every item ──────────
+        for (const dec of decrementedItems) {
+          await this.inventoryMovementRepo.recordMovement(
+            {
+              inventory: dec.inventory,
+              type: InventoryMovementType.SALE,
+              quantityDelta: -dec.quantity,
+              quantityBefore: dec.quantityBefore,
+              quantityAfter: dec.quantityAfter,
+              referenceType: InventoryMovementReferenceType.ORDER,
+              referenceId: order._id,
+              actorId: user._id,
+              reason: `Sale on order ${orderNumber}`,
+            },
+            session,
+          );
+        }
       });
     } finally {
       await session.endSession();
@@ -177,11 +208,27 @@ export class OrdersService {
 
         // Restock every item — inside the same transaction
         for (const item of cancelledOrder.orderItems) {
-          await this.inventoryRepo.incrementStock(
+          const updated = await this.inventoryRepo.incrementStock(
             item.inventory as Types.ObjectId,
             item.quantity,
             session,
           );
+
+          if (updated) {
+            await this.inventoryMovementRepo.recordMovement(
+              {
+                inventory: item.inventory as Types.ObjectId,
+                type: InventoryMovementType.SALE_REVERSAL,
+                quantityDelta: item.quantity,
+                quantityBefore: updated.quantity - item.quantity,
+                quantityAfter: updated.quantity,
+                referenceType: InventoryMovementReferenceType.ORDER,
+                referenceId: cancelledOrder._id,
+                reason: cancellationReason,
+              },
+              session,
+            );
+          }
         }
       });
     } finally {

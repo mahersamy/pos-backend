@@ -22,6 +22,8 @@ import {
   AuditLogModule,
   NotificationModule,
   MenuModule,
+  OrdersModule,
+  ReportsModule,
 } from "./Modules/feature.modules";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
@@ -42,6 +44,8 @@ import { validate } from "./common/Config/env.validation";
     AuditLogModule,
     MenuModule,
     NotificationModule,
+    OrdersModule,
+    ReportsModule,
     ScheduleModule.forRoot(),
 
     // Rate-limiting

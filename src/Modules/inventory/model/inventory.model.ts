@@ -15,6 +15,9 @@ export class Inventory {
   @Prop({ type: Number, required: true, default: 0 })
   quantity: number;
 
+  @Prop({ type: Number, default: 10, min: 0 })
+  reorderLevel: number;
+
   @Prop({
     type: String,
     enum: Object.values(InventoryStock),
@@ -48,3 +51,5 @@ export const InventorySchema = SchemaFactory.createForClass(Inventory);
 InventorySchema.index({ name: 1 });
 InventorySchema.index({ category: 1 });
 InventorySchema.index({ status: 1 });
+InventorySchema.index({ status: 1, quantity: 1 });
+InventorySchema.index({ status: 1, stock: 1 });
