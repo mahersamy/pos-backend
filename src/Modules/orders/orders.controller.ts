@@ -25,6 +25,7 @@ import {
   Action,
   Resource,
   IdempotencyInterceptor,
+  ParamIdDto,
 } from 'src/common';
 import type { UserDocument } from '../users/models/users.model';
 
@@ -66,7 +67,7 @@ export class OrdersController {
   @ApiOkResponse({ description: 'Order retrieved successfully', type: OrderResponseDto })
   @CheckPermissions({ resource: Resource.ORDERS, actions: [Action.READ] })
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param() { id }: ParamIdDto) {
     return this.ordersService.findOne(id);
   }
 
@@ -74,7 +75,11 @@ export class OrdersController {
   @ApiOkResponse({ description: 'Order updated successfully', type: OrderResponseDto })
   @CheckPermissions({ resource: Resource.ORDERS, actions: [Action.WRITE] })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(id, updateOrderDto);
+  update(
+    @Param() { id }: ParamIdDto,
+    @Body() updateOrderDto: UpdateOrderDto,
+    @AuthUser() user: UserDocument,
+  ) {
+    return this.ordersService.update(id, updateOrderDto, user);
   }
 }

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { IdempotencyModule } from '../../common/idempotency/idempotency.module';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { Inventory, InventorySchema } from '../inventory/model/inventory.model';
@@ -23,6 +24,7 @@ import { InventoryMovementRepository } from '../inventory/repository/inventory-m
       { name: Order.name, schema: OrderSchema },
       { name: Counter.name, schema: CounterSchema },
     ]),
+    IdempotencyModule,
   ],
   controllers: [OrdersController],
   providers: [

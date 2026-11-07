@@ -1,15 +1,21 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType, PickType } from '@nestjs/mapped-types';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { CreateOrderDto } from './create-order.dto';
-import { IsString, IsEnum, IsOptional } from 'class-validator';
-import { OrderStatus } from 'src/common';
+import { OrderStatus } from '../../../../common/Enums/order-status';
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {
-  @IsString()
+/**
+ * Only descriptive fields + status can change after creation.
+ * Items / orderType / totals are immutable: changing them would desync stock.
+ */
+export class UpdateOrderDto extends PartialType(
+  PickType(CreateOrderDto, ['table', 'guestName', 'deliveryInfo', 'phoneNumber'] as const),
+) {
   @IsOptional()
   @IsEnum(OrderStatus)
   status?: OrderStatus;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(500)
   cancellationReason?: string;
 }

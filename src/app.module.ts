@@ -32,6 +32,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DatabaseModule } from "./common/database/database.module";
 import { AppCacheModule } from "./common/cache/cache.module";
+import { RedisModule } from "./common/services/redis/redis.module";
 import { validate } from "./common/Config/env.validation";
 
 @Module({
@@ -95,6 +96,7 @@ import { validate } from "./common/Config/env.validation";
 
     // Cache
     AppCacheModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [

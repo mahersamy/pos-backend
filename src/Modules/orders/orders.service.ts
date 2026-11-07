@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection, Types } from 'mongoose';
 import { CreateOrderDto } from './dto/request/create-order.dto';
@@ -13,7 +18,11 @@ import { InventoryMovementRepository } from '../inventory/repository/inventory-m
 import { UserDocument } from '../users/models/users.model';
 import { OrderRepository } from './repository/order.repository';
 import { CounterRepository } from './repository/counter.repository';
-import { ORDER_QUERY_OPTIONS } from './constants/orders.constants';
+import {
+  EDITABLE_ORDER_STATUSES,
+  ORDER_QUERY_OPTIONS,
+  statusesThatCanMoveTo,
+} from './constants/orders.constants';
 import { OrderItem } from './model/orders.model';
 import { OrderStatus } from '../../common';
 
@@ -30,6 +39,16 @@ export class OrdersService {
   ) { }
 
   async create(createOrderDto: CreateOrderDto, user: UserDocument) {
+    // ── 0. Defense in depth: never trust the caller (DTO may be bypassed) ────
+    if (!createOrderDto.inventory?.length) {
+      throw new BadRequestException('order must contain at least one item');
+    }
+    for (const item of createOrderDto.inventory) {
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+        throw new BadRequestException('quantity must be a positive whole number');
+      }
+    }
+
     // ── 1. Aggregate duplicate inventoryIds before touching the DB ──────────
     const quantities = new Map<string, number>();
     for (const item of createOrderDto.inventory) {
@@ -162,48 +181,83 @@ export class OrdersService {
   }
 
   async findOne(id: string) {
-    return this.orderRepo.findById(id, {}, ORDER_QUERY_OPTIONS);
+    const order = await this.orderRepo.findById(id, {}, ORDER_QUERY_OPTIONS);
+    if (!order) throw new NotFoundException('Order not found');
+    return order;
   }
 
-  async update(id: string, updateOrderDto: UpdateOrderDto) {
-    // ── Cancellation: requires transaction to prevent double-restock ─────────
-    if (updateOrderDto.status === OrderStatus.CANCELLED) {
-      if (!updateOrderDto.cancellationReason) {
+  async update(id: string, dto: UpdateOrderDto, user: UserDocument) {
+    const { status, cancellationReason, ...fields } = dto;
+
+    // ── Cancellation: needs a transaction (restock) ──────────────────────────
+    if (status === OrderStatus.CANCELLED) {
+      if (!cancellationReason?.trim()) {
         throw new BadRequestException(
           'cancellationReason is required when cancelling an order',
         );
       }
-      return this.cancelOrder(id, updateOrderDto.cancellationReason);
+      return this.cancelOrder(id, cancellationReason.trim(), user);
     }
 
-    // ── Non-cancellation update (status change, etc.) ────────────────────────
-    const existing = await this.orderRepo.findById(id);
-    if (!existing) throw new BadRequestException('Order not found');
+    if (!status && Object.keys(fields).length === 0) {
+      throw new BadRequestException('Nothing to update');
+    }
 
-    return this.orderRepo.findByIdAndUpdate(id, updateOrderDto, ORDER_QUERY_OPTIONS);
+    // The legality check lives INSIDE the filter, so check + write is one
+    // atomic operation (no read-then-write race between two cashiers).
+    const allowedCurrentStatuses = status
+      ? statusesThatCanMoveTo(status)
+      : [...EDITABLE_ORDER_STATUSES];
+
+    const updated = await this.orderRepo.findOneAndUpdate(
+      { _id: new Types.ObjectId(id), status: { $in: allowedCurrentStatuses } },
+      { $set: { ...fields, ...(status ? { status } : {}), updatedBy: user._id } },
+      ORDER_QUERY_OPTIONS,
+    );
+
+    if (!updated) await this.explainRejectedUpdate(id, status);
+    return updated;
+  }
+
+  /** Called only when a conditional update matched nothing: 404 or 409? */
+  private async explainRejectedUpdate(id: string, target?: OrderStatus): Promise<never> {
+    const current = await this.orderRepo.findById(id);
+    if (!current) throw new NotFoundException('Order not found');
+    throw new ConflictException(
+      target
+        ? `Cannot change order status from "${current.status}" to "${target}"`
+        : `Order is "${current.status}" and can no longer be edited`,
+    );
   }
 
   // ── Private: atomic cancellation in a transaction ─────────────────────────
-  private async cancelOrder(id: string, cancellationReason: string) {
+  private async cancelOrder(id: string, cancellationReason: string, user: UserDocument) {
     const session = await this.connection.startSession();
     let cancelledOrder: any;
 
     try {
       await session.withTransaction(async () => {
-        // Conditional atomic transition: IN_PROCESS/READY → CANCELLED
-        // If the order is already cancelled this returns null → no double-restock
+        // Only in_process / ready orders can be cancelled. A completed order
+        // needs a refund flow; a cancelled one must never be restocked twice.
         cancelledOrder = await this.orderRepo.findOneAndUpdate(
           {
             _id: new Types.ObjectId(id),
-            status: { $ne: OrderStatus.CANCELLED }, // ← guard
+            status: { $in: statusesThatCanMoveTo(OrderStatus.CANCELLED) },
           },
-          { $set: { status: OrderStatus.CANCELLED, cancellationReason } },
+          {
+            $set: {
+              status: OrderStatus.CANCELLED,
+              cancellationReason,
+              updatedBy: user._id,
+            },
+          },
           { session, ...ORDER_QUERY_OPTIONS },
         );
 
         if (!cancelledOrder) {
-          // Either doesn't exist or was already cancelled — abort without restocking
-          throw new ConflictException('Order is already cancelled or does not exist');
+          throw new ConflictException(
+            'Order does not exist or can no longer be cancelled (only in_process/ready orders can be)',
+          );
         }
 
         // Restock every item — inside the same transaction
@@ -224,6 +278,7 @@ export class OrdersService {
                 quantityAfter: updated.quantity,
                 referenceType: InventoryMovementReferenceType.ORDER,
                 referenceId: cancelledOrder._id,
+                actorId: user._id,
                 reason: cancellationReason,
               },
               session,
